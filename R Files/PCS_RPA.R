@@ -30,7 +30,7 @@ active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PC
 
 ################# ETL (Extract, Transform, Load) ###################
 
-##### (Project Coordinator tab)
+##################### (Project Coordinator tab) #####################
 projectlist[-1:-5, -1] -> projectlist
 colnames(projectlist) <- projectlist[1, ]
 projectlist[-1, ] -> projectlist
@@ -41,18 +41,56 @@ projectlist %>%
   readr::type_convert() -> project_coordinator
 
 
-##### (Data - MFG Locs tab)
+##################### (Data - MFG Locs tab) #####################
+# main board (col A to BD)
 all_pcs_project_with_mfg_location %>% 
   data.frame() %>% 
-  janitor::clean_names()-> data_mfg_locs
+  janitor::clean_names() -> data_mfg_locs
 
+# dsx_loc (col BN)
 data_mfg_locs %>% 
   dplyr::mutate(dsx_loc = paste0(project_number, pcs_manufacturing_location)) -> data_mfg_locs
 
+# Component (Col BE)
 active_pack_comp %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1, 5) %>% 
-  dplyr::rename(dsx_loc = projloc) -> active_pack_comp
+  dplyr::rename(dsx_loc = projloc) -> active_pack_comp_1
 
-active_pack_comp[!duplicated(active_pack_comp[,c("projloc ")]),] -> active_pack_comp
+active_pack_comp_1[!duplicated(active_pack_comp_1[,c("dsx_loc")]),] -> active_pack_comp_1
+
+data_mfg_locs %>% 
+  dplyr::left_join(active_pack_comp_1) %>% 
+  dplyr::rename(component = component_type_code) %>% 
+  dplyr::mutate(component = replace(component, is.na(component), 0)) -> data_mfg_locs
+
+
+# Old Component Code (Col BF)
+active_pack_comp %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 6) %>% 
+  dplyr::rename(dsx_loc = projloc) -> active_pack_comp_2
+
+active_pack_comp_2[!duplicated(active_pack_comp_2[,c("dsx_loc")]),] -> active_pack_comp_2
+
+data_mfg_locs %>% 
+  dplyr::left_join(active_pack_comp_2) %>% 
+  dplyr::mutate(old_component_code = replace(old_component_code, is.na(old_component_code), 0)) -> data_mfg_locs
+
+
+# New Component Code (Col BG)
+active_pack_comp %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 7) %>% 
+  dplyr::rename(dsx_loc = projloc) -> active_pack_comp_3
+
+active_pack_comp_3[!duplicated(active_pack_comp_3[,c("dsx_loc")]),] -> active_pack_comp_3
+
+data_mfg_locs %>% 
+  dplyr::left_join(active_pack_comp_3) %>% 
+  dplyr::mutate(new_component_code = replace(new_component_code, is.na(new_component_code), 0)) -> data_mfg_locs
+
+
