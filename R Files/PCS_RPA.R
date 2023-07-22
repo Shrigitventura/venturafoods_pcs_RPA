@@ -93,4 +93,8 @@ data_mfg_locs %>%
   dplyr::left_join(active_pack_comp_3) %>% 
   dplyr::mutate(new_component_code = replace(new_component_code, is.na(new_component_code), 0)) -> data_mfg_locs
 
+# MPI (Col BH)
+
+
+
 
