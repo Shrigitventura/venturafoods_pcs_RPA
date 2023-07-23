@@ -31,6 +31,13 @@ all_pcs_project_with_mfg_location <- read_csv("S:/Global Shared Folders/Large Do
 ################ Read Data Fixed files ####################
 active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
 majorprof_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
+dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
+r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
+minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status.xlsx")
+prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM.xlsx")
+velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
+macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -356,5 +363,178 @@ data_mfg_locs %>%
   dplyr::mutate(prm_date = as.Date(prm_date)) -> data_mfg_locs
 
 
+# DSX (Col BO)
+dsx %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(dsx_loc = row_labels,
+                dsx = sum_of_current_calendar_2yrs_forecast_by_ship_to_mfg_for_pcs_team) %>% 
+  data.frame() -> dsx
+
+data_mfg_locs %>% 
+  dplyr::left_join(dsx) %>% 
+  dplyr::mutate(dsx = replace(dsx, is.na(dsx) | dsx == 0, "-")) -> data_mfg_locs
+
+
+# R&D Primary
+r_d_primary %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 6) %>% 
+  dplyr::rename(project_number = project_number_1,
+                r_d_primary = responsible_user_name) -> r_d_primary
+
+data_mfg_locs %>% 
+  dplyr::left_join(r_d_primary) %>% 
+  dplyr::mutate(r_d_primary = replace(r_d_primary, is.na(r_d_primary) | r_d_primary == 0, "-")) -> data_mfg_locs
+
+
+# Min Key (Col CI)
+data_mfg_locs %>% 
+  dplyr::mutate(min_key = paste0(project_type, pcs_product_category, pcs_product_sub_category)) -> data_mfg_locs
+
+# Min Annual Volume (Col CJ)
+minimums %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 5) %>% 
+  data.frame() %>% 
+  dplyr::rename(min_key = key,
+                min_annual_volume = mn_volume) -> minimums_1
+
+data_mfg_locs %>% 
+  dplyr::left_join(minimums_1) -> data_mfg_locs
+
+# Min Annual VM$ (Col CK)
+minimums %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 6) %>% 
+  data.frame() %>% 
+  dplyr::rename(min_key = key,
+                min_annual_vm = mn_vmdol) -> minimums_2
+
+data_mfg_locs %>% 
+  dplyr::left_join(minimums_2) %>% 
+  dplyr::mutate(min_annual_vm = sprintf("$%.2f", min_annual_vm)) -> data_mfg_locs
+
+
+# Min Annual VM$/LB (Col CL)
+minimums %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 7) %>% 
+  data.frame() %>% 
+  dplyr::rename(min_key = key,
+                min_annual_vm_LB = mn_vmlbs) -> minimums_3
+
+data_mfg_locs %>% 
+  dplyr::left_join(minimums_3) %>% 
+  dplyr::mutate(min_annual_vm_LB = sprintf("$%.2f", min_annual_vm_LB)) -> data_mfg_locs
+
+
+# Net Incremental (Col CD)
+data_mfg_locs %>% 
+  dplyr::mutate(net_incremental = ifelse(pcs_incremental_volume > 0, pcs_incremental_volume, pcs_manufacturing_location_annual_volume_lbs)) -> data_mfg_locs
+
+                
+# PRM Topic (Col CP)
+prm %>% 
+  dplyr::select(1, 3) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number,
+                prm_topic = topic) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> prm_topic
+
+data_mfg_locs %>% 
+  dplyr::left_join(prm_topic) %>% 
+  dplyr::mutate(prm_topic = replace(prm_topic, is.na(prm_topic) | prm_topic == 0, "-")) -> data_mfg_locs  
+
+# PCS Expedited Status (Col CQ)
+prm %>% 
+  dplyr::select(1, 6) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> pcs_expedited_status
+
+data_mfg_locs %>% 
+  dplyr::left_join(pcs_expedited_status) %>% 
+  dplyr::mutate(pcs_expedited_status = replace(pcs_expedited_status, is.na(pcs_expedited_status) | pcs_expedited_status == 0, "-")) -> data_mfg_locs  
+
+# PRM Submit Month (Col CR)
+prm %>% 
+  dplyr::select(1, 7) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number,
+                prm_submit_month = prm_submit_month_year) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> prm_submit_month
+
+data_mfg_locs %>% 
+  dplyr::left_join(prm_submit_month) %>% 
+  dplyr::mutate(prm_submit_month = replace(prm_submit_month, is.na(prm_submit_month) | prm_submit_month == 0, "-")) -> data_mfg_locs 
+
+# PRM Submit Year (Col CS)
+prm %>% 
+  dplyr::select(1, 8) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> prm_submit_year
+
+data_mfg_locs %>% 
+  dplyr::left_join(prm_submit_year) %>% 
+  dplyr::mutate(prm_submit_year = replace(prm_submit_year, is.na(prm_submit_year) | prm_submit_year == 0, "-")) -> data_mfg_locs 
+
+# Reason for Expedite (Col CT)
+prm %>% 
+  dplyr::select(1, 9) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> reason_for_expedite
+
+data_mfg_locs %>% 
+  dplyr::left_join(reason_for_expedite) %>% 
+  dplyr::mutate(reason_for_expedite = replace(reason_for_expedite, is.na(reason_for_expedite) | reason_for_expedite == 0, "-")) -> data_mfg_locs
+
+
+# Velocity Opp (Col CN)
+velocity %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_fs_id_number, 
+                velocity_opp = forecast_submission_id) -> velocity_opp
+
+data_mfg_locs %>% 
+  dplyr::left_join(velocity_opp) %>% 
+  dplyr::mutate(velocity_opp = replace(velocity_opp, is.na(velocity_opp) | velocity_opp == 0, "-")) -> data_mfg_locs
+
+
+# Velocity Capacity Check (Col DI)
+velocity %>% 
+  dplyr::select(1, 5) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_fs_id_number, 
+                velocity_capacity_check = operations_confirmed_capacity) -> velocity_capacity_check
+
+data_mfg_locs %>% 
+  dplyr::left_join(velocity_capacity_check) %>% 
+  dplyr::mutate(velocity_capacity_check = replace(velocity_capacity_check, is.na(velocity_capacity_check) | velocity_capacity_check == 0, "-")) -> data_mfg_locs
+
+
+# Velocity Capacity Check Date (DJ)
+velocity %>% 
+  dplyr::select(1, 6) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_fs_id_number, 
+                velocity_capacity_check_date = capacity_confirm_date) %>% 
+  dplyr::mutate(velocity_capacity_check_date = as.Date(velocity_capacity_check_date)) -> velocity_capacity_check_date
+
+data_mfg_locs %>% 
+  dplyr::left_join(velocity_capacity_check_date) %>% 
+  dplyr::mutate(velocity_capacity_check_date = ifelse(is.na(velocity_capacity_check_date), "_", velocity_capacity_check_date)) -> data_mfg_locs
+
+# Macro Platform (Col CU)
+macro %>% 
+  dplyr::select(1, 4) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(platform_and_packaging_type = platform_1) -> macro_platform
+
+data_mfg_locs %>% 
+  dplyr::left_join(macro_platform) %>% 
+  dplyr::mutate(macro_platform = ifelse(is.na(macro_platform), "_", macro_platform)) -> data_mfg_locs
 
 
