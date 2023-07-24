@@ -38,6 +38,13 @@ comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM.xlsx")
 velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
+stocking <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Stocking.xlsx")
+master_data <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Master Data.xlsx")
+snop_comment_latest <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP Comment Latest.xlsx")
+packaging_specialist <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Packaging Specialist.xlsx")
+test <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Test Flag Code.xlsx")
+pmo <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Reg PMO Team.xlsx")
+stage_3_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP CapS3 Comment Latest.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -441,6 +448,8 @@ prm %>%
                 prm_topic = topic) %>% 
   dplyr::mutate(project_number = as.double(project_number)) -> prm_topic
 
+prm_topic[!duplicated(prm_topic[,c("project_number")]),] -> prm_topic
+
 data_mfg_locs %>% 
   dplyr::left_join(prm_topic) %>% 
   dplyr::mutate(prm_topic = replace(prm_topic, is.na(prm_topic) | prm_topic == 0, "-")) -> data_mfg_locs  
@@ -451,6 +460,8 @@ prm %>%
   janitor::clean_names() %>% 
   dplyr::rename(project_number = pcs_number) %>% 
   dplyr::mutate(project_number = as.double(project_number)) -> pcs_expedited_status
+
+pcs_expedited_status[!duplicated(pcs_expedited_status[,c("project_number")]),] -> pcs_expedited_status
 
 data_mfg_locs %>% 
   dplyr::left_join(pcs_expedited_status) %>% 
@@ -464,6 +475,8 @@ prm %>%
                 prm_submit_month = prm_submit_month_year) %>% 
   dplyr::mutate(project_number = as.double(project_number)) -> prm_submit_month
 
+prm_submit_month[!duplicated(prm_submit_month[,c("project_number")]),] -> prm_submit_month
+
 data_mfg_locs %>% 
   dplyr::left_join(prm_submit_month) %>% 
   dplyr::mutate(prm_submit_month = replace(prm_submit_month, is.na(prm_submit_month) | prm_submit_month == 0, "-")) -> data_mfg_locs 
@@ -475,6 +488,8 @@ prm %>%
   dplyr::rename(project_number = pcs_number) %>% 
   dplyr::mutate(project_number = as.double(project_number)) -> prm_submit_year
 
+prm_submit_year[!duplicated(prm_submit_year[,c("project_number")]),] -> prm_submit_year
+
 data_mfg_locs %>% 
   dplyr::left_join(prm_submit_year) %>% 
   dplyr::mutate(prm_submit_year = replace(prm_submit_year, is.na(prm_submit_year) | prm_submit_year == 0, "-")) -> data_mfg_locs 
@@ -485,6 +500,8 @@ prm %>%
   janitor::clean_names() %>% 
   dplyr::rename(project_number = pcs_number) %>% 
   dplyr::mutate(project_number = as.double(project_number)) -> reason_for_expedite
+
+reason_for_expedite[!duplicated(reason_for_expedite[,c("project_number")]),] -> reason_for_expedite
 
 data_mfg_locs %>% 
   dplyr::left_join(reason_for_expedite) %>% 
@@ -538,3 +555,175 @@ data_mfg_locs %>%
   dplyr::mutate(macro_platform = ifelse(is.na(macro_platform), "_", macro_platform)) -> data_mfg_locs
 
 
+# Less than 1 pallet/month Min (Col CV)
+stocking %>% 
+  dplyr::select(1, 67) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = project_number_1) -> stocking_less_than_1_pallet
+
+stocking_less_than_1_pallet[!duplicated(stocking_less_than_1_pallet[,c("project_number")]),] -> stocking_less_than_1_pallet
+
+data_mfg_locs %>% 
+  dplyr::left_join(stocking_less_than_1_pallet) %>% 
+  dplyr::mutate(less_than_1_pallet_month_min = replace(less_than_1_pallet_month_min, is.na(less_than_1_pallet_month_min) | less_than_1_pallet_month_min == 0, "-")) -> data_mfg_locs
+
+
+# MDM Base Bulk Oil (Col  CW)
+master_data %>% 
+  dplyr::select(1, 4) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(new_sku_base = base_product_code,
+                mdm_base_bulk_oil = bulk_oil_type) -> master_data_bulk_oil
+
+master_data_bulk_oil[!duplicated(master_data_bulk_oil[,c("new_sku_base")]),] -> master_data_bulk_oil
+
+data_mfg_locs %>% 
+  dplyr::left_join(master_data_bulk_oil) %>% 
+  dplyr::mutate(mdm_base_bulk_oil = replace(mdm_base_bulk_oil, is.na(mdm_base_bulk_oil) | mdm_base_bulk_oil == 0, "-")) -> data_mfg_locs
+
+# MDM Total Oil % (Col CX)
+master_data %>% 
+  dplyr::select(1, 9) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(new_sku_base = base_product_code,
+                mdm_total_oil_percent = percent_of_oil) -> master_data_total_percent
+
+master_data_total_percent[!duplicated(master_data_total_percent[,c("new_sku_base")]),] -> master_data_total_percent
+
+data_mfg_locs %>% 
+  dplyr::left_join(master_data_total_percent) -> data_mfg_locs
+
+
+# Total Incremental Oil Volume (Col CY)
+data_mfg_locs %>% 
+  dplyr::mutate(total_incremental_oil_volume = mdm_total_oil_percent * net_incremental) %>% 
+  dplyr::mutate(total_incremental_oil_volume = round(total_incremental_oil_volume, 0)) %>% 
+  dplyr::mutate(total_incremental_oil_volume = replace(total_incremental_oil_volume, is.na(total_incremental_oil_volume) | total_incremental_oil_volume == 0, "-")) -> data_mfg_locs
+
+
+# PCS NF or MDM Bulk Oil (Col CZ)
+data_mfg_locs %>% 
+  dplyr::mutate(pcs_nf_or_mdm_bulk_oil = ifelse(mdm_base_bulk_oil == 0, new_sku_base, mdm_base_bulk_oil)) %>% 
+  dplyr::mutate(mdm_total_oil_percent = sprintf("%1.2f%%", 100 * mdm_total_oil_percent)) %>% 
+  dplyr::mutate(mdm_total_oil_percent = ifelse(mdm_total_oil_percent == "NA%", "-", mdm_total_oil_percent)) -> data_mfg_locs
+
+# S&OP Comment (Col DA)
+snop_comment_latest %>% 
+  dplyr::select(1, 3) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(snop_comment = pcs_comment) -> snop_comment
+
+data_mfg_locs %>% 
+  dplyr::left_join(snop_comment) %>% 
+  dplyr::mutate(snop_comment = replace(snop_comment, is.na(snop_comment) | snop_comment == 0, "-")) -> data_mfg_locs
+
+# S&OP Comment Date (Col DB)
+snop_comment_latest %>% 
+  dplyr::select(1, 4) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(snop_comment_date = pcs_comment_last_updated_date) %>% 
+  dplyr::mutate(snop_comment_date = as.Date(snop_comment_date)) -> snop_comment_date
+
+data_mfg_locs %>% 
+  dplyr::left_join(snop_comment_date) %>% 
+  dplyr::mutate(snop_comment_date = ifelse(is.na(snop_comment_date), 0, snop_comment_date)) %>% 
+  dplyr::mutate(snop_comment_date = as.Date(snop_comment_date, origin = "1899-12-30")) -> data_mfg_locs
+
+# S&OP Comment Author (Col DC)
+snop_comment_latest %>% 
+  dplyr::select(1, 5) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(snop_comment_author = pcs_comment_last_updated_by) -> snop_comment_author
+
+data_mfg_locs %>% 
+  dplyr::left_join(snop_comment_author) %>% 
+  dplyr::mutate(snop_comment_author = ifelse(is.na(snop_comment_author), "-", snop_comment_author)) -> data_mfg_locs
+
+
+# Packaging Graphics Coordinator (Col DD)
+packaging_specialist %>% 
+  dplyr::select(1, 6) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = project_number_1,
+                packaging_graphics_coordinator = responsible_user_name) -> packaging_graphics_coordinator
+
+
+data_mfg_locs %>% 
+  dplyr::left_join(packaging_graphics_coordinator) %>% 
+  dplyr::mutate(packaging_graphics_coordinator = ifelse(is.na(packaging_graphics_coordinator), "-", packaging_graphics_coordinator)) -> data_mfg_locs
+
+
+
+# Multiple MFG Plants per Project (Col DE)
+data_mfg_locs %>% 
+  dplyr::group_by(project_number) %>% 
+  dplyr::summarize(project_number_count_if = n()) %>% 
+  dplyr::mutate(count = table(project_number)) %>% 
+  dplyr::select(1, 2) -> project_number_count_if
+
+
+data_mfg_locs %>% 
+  dplyr::left_join(project_number_count_if) %>% 
+  dplyr::mutate(multiple_mfg_plants_per_project = ifelse(project_number_count_if > 1, "Yes", "No")) %>% 
+  dplyr::select(-project_number_count_if) -> data_mfg_locs
+
+
+# Test Run Required2 (Col DF)
+test %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(test_run_required2 = test,
+                manufacturing_packet_needed = x2) -> test_flag_code
+
+data_mfg_locs %>% 
+  dplyr::left_join(test_flag_code) %>% 
+  dplyr::mutate(test_run_required2 = replace(test_run_required2, is.na(test_run_required2), 0)) -> data_mfg_locs
+
+
+# Plant PMO Region (Col DG)
+pmo %>% 
+  dplyr::select(1, 3) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_manufacturing_location = plant,
+                plant_pmo_region = pmo_region) -> pmo_region
+
+
+data_mfg_locs %>% 
+  dplyr::left_join(pmo_region) %>% 
+  dplyr::mutate(plant_pmo_region = replace(plant_pmo_region, is.na(plant_pmo_region) | plant_pmo_region == 0, "-")) -> data_mfg_locs
+
+
+# Plant PMO Lead (Col DH)
+pmo %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_manufacturing_location = plant,
+                plant_pmo_lead = pmo_lead) -> pmo_lead
+
+data_mfg_locs %>% 
+  dplyr::left_join(pmo_lead) %>% 
+  dplyr::mutate(plant_pmo_lead = replace(plant_pmo_lead, is.na(plant_pmo_lead) | plant_pmo_lead == 0, "-")) -> data_mfg_locs
+
+
+# Stage 3 Capacity Check (Col DK)
+stage_3_capacity_check %>% 
+  dplyr::select(1, 3) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(stage_3_capacity_check = pcs_comment) -> stage_3_capacity_check_1
+
+data_mfg_locs %>% 
+  dplyr::left_join(stage_3_capacity_check_1) %>% 
+  dplyr::mutate(stage_3_capacity_check = replace(stage_3_capacity_check, is.na(stage_3_capacity_check) | stage_3_capacity_check == 0, "-")) -> data_mfg_locs
+
+
+# Stage 3 Capacity Check Date (Col DL)
+stage_3_capacity_check %>% 
+  dplyr::select(1, 4) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(stage_3_capacity_check_date = pcs_comment_last_updated_date) %>% 
+  dplyr::mutate(stage_3_capacity_check_date = as.Date(stage_3_capacity_check_date)) -> stage_3_capacity_check_date
+
+data_mfg_locs %>% 
+  dplyr::left_join(stage_3_capacity_check_date) %>% 
+  dplyr::mutate(stage_3_capacity_check_date = ifelse(is.na(stage_3_capacity_check_date), 0, stage_3_capacity_check_date)) -> d
+
+######## Fix 0 to "-" as well as the row number 620 as well.
