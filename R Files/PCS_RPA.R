@@ -45,6 +45,8 @@ packaging_specialist <- read_excel("S:/Global Shared Folders/Large Documents/S&O
 test <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Test Flag Code.xlsx")
 pmo <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Reg PMO Team.xlsx")
 stage_3_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP CapS3 Comment Latest.xlsx")
+stage_1_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP CapS1 Comment Latest.xlsx")
+comp_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Component Type.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -80,8 +82,7 @@ active_pack_comp_1[!duplicated(active_pack_comp_1[,c("dsx_loc")]),] -> active_pa
 
 data_mfg_locs %>% 
   dplyr::left_join(active_pack_comp_1) %>% 
-  dplyr::rename(component = component_type_code) %>% 
-  dplyr::mutate(component = replace(component, is.na(component), 0)) -> data_mfg_locs
+  dplyr::mutate(component_type_code = replace(component_type_code, is.na(component_type_code), 0)) -> data_mfg_locs
 
 
 # Old Component Code (Col BF)
@@ -626,8 +627,8 @@ snop_comment_latest %>%
 
 data_mfg_locs %>% 
   dplyr::left_join(snop_comment_date) %>% 
-  dplyr::mutate(snop_comment_date = ifelse(is.na(snop_comment_date), 0, snop_comment_date)) %>% 
-  dplyr::mutate(snop_comment_date = as.Date(snop_comment_date, origin = "1899-12-30")) -> data_mfg_locs
+  dplyr::mutate(snop_comment_date = ifelse(is.na(snop_comment_date), 0, snop_comment_date)) -> data_mfg_locs
+
 
 # S&OP Comment Author (Col DC)
 snop_comment_latest %>% 
@@ -724,6 +725,67 @@ stage_3_capacity_check %>%
 
 data_mfg_locs %>% 
   dplyr::left_join(stage_3_capacity_check_date) %>% 
-  dplyr::mutate(stage_3_capacity_check_date = ifelse(is.na(stage_3_capacity_check_date), 0, stage_3_capacity_check_date)) -> d
+  dplyr::mutate(stage_3_capacity_check_date = ifelse(is.na(stage_3_capacity_check_date), 0, stage_3_capacity_check_date)) -> data_mfg_locs
 
-######## Fix 0 to "-" as well as the row number 620 as well.
+
+
+# Stage 1 Capacity Check (Col DM)
+stage_1_capacity_check %>% 
+  dplyr::select(1, 3) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(stage_1_capacity_check = pcs_comment) -> stage_1_capacity_check_1
+
+data_mfg_locs %>% 
+  dplyr::left_join(stage_1_capacity_check_1) %>% 
+  dplyr::mutate(stage_1_capacity_check = replace(stage_1_capacity_check, is.na(stage_1_capacity_check) | stage_1_capacity_check == 0, "-")) -> data_mfg_locs
+
+# Stage 1 Capacity Check Date (Col DN)
+stage_1_capacity_check %>% 
+  dplyr::select(1, 4) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(stage_1_capacity_check_date = pcs_comment_last_updated_date) %>% 
+  dplyr::mutate(stage_1_capacity_check_date = as.Date(stage_1_capacity_check_date)) -> stage_1_capacity_check_date
+
+data_mfg_locs %>% 
+  dplyr::left_join(stage_1_capacity_check_date) %>% 
+  dplyr::mutate(stage_1_capacity_check_date = ifelse(is.na(stage_1_capacity_check_date), 0, stage_1_capacity_check_date)) -> data_mfg_locs
+
+
+# Component Type2 (Col DO)
+comp_type %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(component_type_2 = component_type_name) -> comp_type_1
+
+
+data_mfg_locs %>% 
+  dplyr::left_join(comp_type_1) %>% 
+  dplyr::mutate(component_type_2 = ifelse(is.na(component_type_2), 0, component_type_2)) -> data_mfg_locs
+
+
+# Tracker Project Type (Col DP)
+data_mfg_locs %>% 
+  dplyr::mutate(tracker_project_type = "PCS") -> data_mfg_locs
+
+
+# Plant (Col DQ)
+data_mfg_locs %>% 
+  dplyr::mutate(plant = pcs_manufacturing_location) -> data_mfg_locs
+
+# Project Onwer (Col DS)
+data_mfg_locs %>% 
+  dplyr::mutate(project_owner = requestor) -> data_mfg_locs
+
+
+# Line (Col DT)
+data_mfg_locs %>% 
+  dplyr::mutate(line = suggested_line_number) %>% 
+  dplyr::mutate(suggested_line_number = ifelse(is.na(suggested_line_number), 0, suggested_line_number)) -> data_mfg_locs
+
+# Duration (# of weeks) (Col EB)
+data_mfg_locs %>% 
+  dplyr::mutate(duration_number_of_weeks = ifelse(lto_estimated_end_date == "1900-01-01", 0, (lto_estimated_end_date - desired_launch_date)/7),
+                duration_number_of_weeks = round(duration_number_of_weeks, 0)) -> data_mfg_locs
+
+
+
+
