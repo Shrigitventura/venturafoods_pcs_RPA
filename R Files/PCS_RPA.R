@@ -965,3 +965,7 @@ storage_temp %>%
 data3_stocking_locs %>% 
   dplyr::left_join(storage_temp_range) -> data3_stocking_locs
 
+
+
+# Next: Sales Project Notes Tab 9:56
+
