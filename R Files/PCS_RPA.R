@@ -19,6 +19,7 @@ library(rio)
 
 projectlist <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Weekly PCS Project Rpt/2023/7 July/ProjectList_7_3_2023 11_44_28 AM.xlsx")
 all_pcs_project_with_mfg_location <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - With MFG Locations (59).csv")
+all_pcs_project_without_location <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - Without Locations (43).csv")
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
@@ -30,7 +31,7 @@ all_pcs_project_with_mfg_location <- read_csv("S:/Global Shared Folders/Large Do
 
 ################ Read Data Fixed files ####################
 active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
-majorprof_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
+majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
@@ -113,7 +114,7 @@ data_mfg_locs %>%
   dplyr::mutate(new_component_code = replace(new_component_code, is.na(new_component_code), 0)) -> data_mfg_locs
 
 # MPI (Col BH) 
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1:2) %>% 
@@ -123,7 +124,7 @@ data_mfg_locs %>%
   dplyr::left_join(mpi) -> data_mfg_locs
 
 # Desired launch month (Col BI)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,3) %>% 
@@ -134,7 +135,7 @@ data_mfg_locs %>%
 
 
 # Desired Launch Year (Col BJ)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,5) -> desired_launch_year
@@ -144,7 +145,7 @@ data_mfg_locs %>%
 
 
 # Project Coordinator (Col BK)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,6) -> project_coordinator
@@ -155,7 +156,7 @@ data_mfg_locs %>%
 
 
 # Processing Type (Col BL)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,8) -> processing_type
@@ -165,7 +166,7 @@ data_mfg_locs %>%
 
 
 # Submitted Month (Col BP)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,12) %>% 
@@ -177,7 +178,7 @@ data_mfg_locs %>%
 
 
 # Submitted Year (Col BQ)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,14) -> submitted_year
@@ -187,7 +188,7 @@ data_mfg_locs %>%
   dplyr::mutate(submitted_year = replace(submitted_year, is.na(submitted_year), 0)) -> data_mfg_locs
 
 # Channel 1 Approver (Col BR)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,17) -> channel_1_approver
@@ -198,7 +199,7 @@ data_mfg_locs %>%
 
 
 # Channel 2 Approver (Col BS)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,18) -> channel_2_approver
@@ -209,7 +210,7 @@ data_mfg_locs %>%
 
 
 # Sales Project Notes (Col BT)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,19) -> sales_project_notes
@@ -220,7 +221,7 @@ data_mfg_locs %>%
 
 
 # Sales Project Note Timestamp (Col BU)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,20) -> sales_project_note_timestamp
@@ -230,7 +231,7 @@ data_mfg_locs %>%
   dplyr::mutate(sales_project_note_timestamp = as.Date(sales_project_note_timestamp)) -> data_mfg_locs
 
 # Sales Comment Author (Col BV)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,21) -> sales_comment_author
@@ -240,7 +241,7 @@ data_mfg_locs %>%
   dplyr::mutate(sales_comment_author = replace(sales_comment_author, is.na(sales_comment_author) | sales_comment_author == 0, "-")) -> data_mfg_locs
 
 # Latest Comment Type (Col BW)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,22) -> latest_comment_type
@@ -251,7 +252,7 @@ data_mfg_locs %>%
 
 
 # Latest Comment (Col BX)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,23) -> latest_comment
@@ -261,7 +262,7 @@ data_mfg_locs %>%
   dplyr::mutate(latest_comment = replace(latest_comment, is.na(latest_comment) | latest_comment == 0, "-")) -> data_mfg_locs
 
 # Latest Comment Date (Col BY)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,24) -> latest_comment_date
@@ -271,7 +272,7 @@ data_mfg_locs %>%
   dplyr::mutate(latest_comment_date = as.Date(latest_comment_date)) -> data_mfg_locs
 
 # Latest Comment Author (Col BZ)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,25) -> latest_comment_author
@@ -282,7 +283,7 @@ data_mfg_locs %>%
 
 
 # days since Project was created (Col CA)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,29) %>% 
@@ -294,7 +295,7 @@ data_mfg_locs %>%
 
 
 # Actual Comp Month (Col CB)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,32) -> actual_comp_month
@@ -305,7 +306,7 @@ data_mfg_locs %>%
 
 
 # Actual Comp Year (Col CC)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,33) -> actual_comp_year
@@ -316,7 +317,7 @@ data_mfg_locs %>%
 
 
 # Customer Clean (Col CE)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,34) -> customer_clean
@@ -327,7 +328,7 @@ data_mfg_locs %>%
 
 
 # Requestor Latest (Col CF)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,35) -> requestor_latest
@@ -338,7 +339,7 @@ data_mfg_locs %>%
 
 
 # Export Region2 (Col CG)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,37) %>% 
@@ -350,7 +351,7 @@ data_mfg_locs %>%
 
 
 # Project Type Shortened (Col CM)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,7) -> project_type_shortened
@@ -361,7 +362,7 @@ data_mfg_locs %>%
 
 
 # PRM Date (Col CO)
-majorprof_monthyr %>% 
+majorproj_monthyr %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1,38) -> prm_date
@@ -785,6 +786,39 @@ data_mfg_locs %>%
 data_mfg_locs %>% 
   dplyr::mutate(duration_number_of_weeks = ifelse(lto_estimated_end_date == "1900-01-01", 0, (lto_estimated_end_date - desired_launch_date)/7),
                 duration_number_of_weeks = round(duration_number_of_weeks, 0)) -> data_mfg_locs
+
+
+
+
+##################### (Data2 - No Locs tab) #####################   
+
+# main board (col A to Q)
+
+all_pcs_project_without_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() -> data2_no_locs
+
+
+# MPI (Col R)
+data2_no_locs %>% 
+  dplyr::left_join(mpi) -> data2_no_locs
+
+# Desired Launch Year (Col S)
+data2_no_locs %>% 
+  dplyr::left_join(desired_launch_year) -> data2_no_locs
+
+# Project Coordinator (Col T)
+data2_no_locs %>% 
+  dplyr::left_join(project_coordinator) -> data2_no_locs
+
+# Processing Type (Col U)
+data2_no_locs %>% 
+  dplyr::left_join(processing_type) -> data2_no_locs
+
+# Customer Clean (Col W)
+data2_no_locs %>% 
+  dplyr::left_join(customer_clean) %>% 
+  dplyr::mutate(customer_clean = replace(customer_clean, is.na(customer_clean) | customer_clean == 0, "-")) -> data2_no_locs
 
 
 
