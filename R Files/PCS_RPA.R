@@ -20,6 +20,8 @@ library(rio)
 projectlist <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Weekly PCS Project Rpt/2023/7 July/ProjectList_7_3_2023 11_44_28 AM.xlsx")
 all_pcs_project_with_mfg_location <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - With MFG Locations (59).csv")
 all_pcs_project_without_location <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - Without Locations (43).csv")
+all_pcs__with_stocking_location <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS - With Stocking Locations (45).csv")
+
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
@@ -48,6 +50,7 @@ pmo <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 stage_3_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP CapS3 Comment Latest.xlsx")
 stage_1_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP CapS1 Comment Latest.xlsx")
 comp_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Component Type.xlsx")
+storage_temp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Storage Temp.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -67,6 +70,23 @@ projectlist %>%
 all_pcs_project_with_mfg_location %>% 
   data.frame() %>% 
   janitor::clean_names() -> data_mfg_locs
+
+# main board NA work
+data_mfg_locs %>% 
+  dplyr::mutate(sku_label_being_replaced = ifelse(is.na(sku_label_being_replaced) | sku_label_being_replaced == "N/A", "-", sku_label_being_replaced)) %>% 
+  dplyr::mutate(formula_request_type = ifelse(is.na(formula_request_type) | formula_request_type == "N/A", "-", formula_request_type)) %>% 
+  dplyr::mutate(export_region = ifelse(is.na(export_region) | export_region == "N/A", "-", export_region)) %>% 
+  dplyr::mutate(pcs_product_group = ifelse(is.na(pcs_product_group) | pcs_product_group == "N/A", "-", pcs_product_group)) %>% 
+  dplyr::mutate(suggested_line_number = ifelse(is.na(suggested_line_number) | suggested_line_number == "N/A", "-", suggested_line_number)) %>% 
+  dplyr::mutate(suggested_deck = ifelse(is.na(suggested_deck) | suggested_deck == "N/A", "-", suggested_deck)) %>% 
+  dplyr::mutate(r_d_formula_number = ifelse(is.na(r_d_formula_number) | r_d_formula_number == "N/A", "-", r_d_formula_number)) %>% 
+  dplyr::mutate(bulk_oil_type = ifelse(is.na(bulk_oil_type) | bulk_oil_type == "N/A", "-", bulk_oil_type)) %>% 
+  dplyr::mutate(new_sku_label = ifelse(is.na(new_sku_label) | new_sku_label == "N/A", "-", new_sku_label)) %>% 
+  dplyr::mutate(manufacturing_packet_needed = ifelse(is.na(manufacturing_packet_needed) | manufacturing_packet_needed == "N/A", "-", manufacturing_packet_needed)) %>% 
+  dplyr::mutate(test_run_required = ifelse(is.na(test_run_required) | test_run_required == "N/A", "-", test_run_required)) %>%
+  dplyr::mutate(capex = ifelse(is.na(capex) | capex == "N/A", "-", capex)) -> data_mfg_locs
+
+
 
 # dsx_loc (col BN)
 data_mfg_locs %>% 
@@ -798,6 +818,9 @@ all_pcs_project_without_location %>%
   janitor::clean_names() %>% 
   data.frame() -> data2_no_locs
 
+# main board NA work
+data2_no_locs %>% 
+  dplyr::mutate(formula_request_type = ifelse(is.na(formula_request_type) | formula_request_type == "N/A", "-", formula_request_type)) -> data2_no_locs
 
 # MPI (Col R)
 data2_no_locs %>% 
@@ -823,7 +846,122 @@ data2_no_locs %>%
 
 
 
-##################### (Data3 - Stocking Locs tab) #####################
+##################### (Data3 - Stocking Locs tab) #####################   9:24
+
+# Main board (Col A - AZ)
+
+all_pcs__with_stocking_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::relocate(project_number) -> data3_stocking_locs
+
+# NA works for main board
+data3_stocking_locs %>% 
+  dplyr::mutate(estimated_probability_of_success_percent = ifelse(is.na(estimated_probability_of_success_percent) | estimated_probability_of_success_percent == "N/A", "-", estimated_probability_of_success_percent)) %>% 
+  dplyr::mutate(new_or_replacing_existing_volume = ifelse(is.na(new_or_replacing_existing_volume) | new_or_replacing_existing_volume == "N/A", "-", new_or_replacing_existing_volume)) %>% 
+  dplyr::mutate(sku_label_being_replaced = ifelse(is.na(sku_label_being_replaced) | sku_label_being_replaced == "N/A", "-", sku_label_being_replaced)) %>% 
+  dplyr::mutate(co_pack_vendor_information = ifelse(is.na(co_pack_vendor_information), "-", co_pack_vendor_information)) %>% 
+  dplyr::mutate(formula_request_type = ifelse(is.na(formula_request_type) | formula_request_type == "N/A", "-", formula_request_type)) %>% 
+  dplyr::mutate(dry_storage_required = ifelse(is.na(dry_storage_required) | dry_storage_required == "N/A", "-", dry_storage_required)) -> data3_stocking_locs
 
 
+# Desired launch month name (Col BA)
+data3_stocking_locs %>% 
+  dplyr::left_join(desired_launch_month) -> data3_stocking_locs
+
+# Desired Launch Year (Col BB)
+data3_stocking_locs %>% 
+  dplyr::left_join(desired_launch_year) -> data3_stocking_locs
+
+# Project Coordinator (Col BC)
+data3_stocking_locs %>% 
+  dplyr::left_join(project_coordinator) -> data3_stocking_locs
+
+# Processing Type (Col BD)
+data3_stocking_locs %>% 
+  dplyr::left_join(processing_type) %>% 
+  dplyr::mutate(processing_type = replace(processing_type, is.na(processing_type) | processing_type == 0, "-")) -> data3_stocking_locs  
+
+# Proj Type Desc (Col BE)
+data3_stocking_locs %>% 
+  dplyr::left_join(project_type_shortened) %>% 
+  dplyr::rename(project_type_desc = project_type_shortened) -> data3_stocking_locs
+
+# Latest Comment Type (Col BF)
+data3_stocking_locs %>% 
+  dplyr::left_join(latest_comment_type) -> data3_stocking_locs
+
+# Latest Comment (Col BG)
+data3_stocking_locs %>% 
+  dplyr::left_join(latest_comment) -> data3_stocking_locs
+
+# Latest Comment Date (Col BH)
+data3_stocking_locs %>% 
+  dplyr::left_join(latest_comment_date) %>% 
+  dplyr::mutate(latest_comment_date = as.Date(latest_comment_date)) -> data3_stocking_locs
+
+# Latest Comment Author (Col BI)
+data3_stocking_locs %>% 
+  dplyr::left_join(latest_comment_author) -> data3_stocking_locs
+
+# Annual stocking # pallets (Col BJ)
+data3_stocking_locs %>% 
+  dplyr::mutate(annual_stocking_number_pallets = annual_stocking_cases / cases_per_pallet) %>% 
+  dplyr::mutate(annual_stocking_number_pallets = ifelse(
+    is.na(annual_stocking_number_pallets) | is.nan(annual_stocking_number_pallets) | is.infinite(annual_stocking_number_pallets),
+    0, annual_stocking_number_pallets)
+  ) %>% 
+  dplyr::mutate(annual_stocking_number_pallets = round(annual_stocking_number_pallets, 0)) %>% 
+  dplyr::mutate(annual_stocking_number_pallets = ifelse(annual_stocking_number_pallets == 0, "-", annual_stocking_number_pallets)) -> data3_stocking_locs
+
+# Net Incremental (Col BK)
+data3_stocking_locs %>% 
+  dplyr::mutate(net_incremantal = ifelse(pcs_incremental_volume == 0, year_1_annual_volume, pcs_incremental_volume)) -> data3_stocking_locs
+
+# Customer Clean (Col BL)
+data3_stocking_locs %>% 
+  dplyr::left_join(customer_clean) %>% 
+  dplyr::mutate(customer_clean = replace(customer_clean, is.na(customer_clean) | customer_clean == 0, "-")) -> data3_stocking_locs
+
+# Product Platform (Col BM)   Col name in Excel is wrong (This is not Cases per Pallet)
+master_data %>% 
+  dplyr::select(1, 8) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(new_sku_base = base_product_code) -> product_platform
+
+data3_stocking_locs %>% 
+  dplyr::left_join(product_platform) %>% 
+  dplyr::mutate(product_platform = replace(product_platform, is.na(product_platform) | product_platform == 0, "-")) -> data3_stocking_locs
+
+# Monthly Cases Volume (Col BN)
+data3_stocking_locs %>% 
+  dplyr::mutate(monthly_cases_volume = annual_stocking_cases / 12,
+                monthly_cases_volume = round(monthly_cases_volume, 0)) %>% 
+  dplyr::mutate(monthly_cases_volume = replace(monthly_cases_volume, is.na(monthly_cases_volume) | monthly_cases_volume == 0, "-")) -> data3_stocking_locs
+
+# Less than 1 pallet/month Min (Col BO)
+data3_stocking_locs %>% 
+  dplyr::mutate(less_than_1_pallet_month_min = ifelse(monthly_cases_volume < cases_per_pallet, "Yes", "No")) -> data3_stocking_locs
+
+# Storage Temp (Col BP)
+master_data %>% 
+  dplyr::select(1, 5) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(new_sku_base = base_product_code,
+                storage_temp_ref_code = refrigeration_code) -> storage_temp_ref_code
+
+  
+data3_stocking_locs %>% 
+  dplyr::left_join(storage_temp_ref_code) -> data3_stocking_locs
+
+
+# Storage Temp Range (Col BQ)
+storage_temp %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 4) %>% 
+  dplyr::rename(storage_temp_ref_code = ref_code,
+                storage_temp_range = range) -> storage_temp_range
+
+data3_stocking_locs %>% 
+  dplyr::left_join(storage_temp_range) -> data3_stocking_locs
 
