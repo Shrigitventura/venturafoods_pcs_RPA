@@ -1,6 +1,6 @@
 
-# Now 13:56. 
-# go to Row number 111
+# Now 15:50. 
+# Master data tab
 
 
 
@@ -30,6 +30,7 @@ all_pcs__with_stocking_location <- read_csv("S:/Global Shared Folders/Large Docu
 pcs_sales_comments <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS Sales Comments (42).csv")
 pcs_all_comments <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS All Comments (46).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
+pcs_active_pack_components <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS Active Pack Components (42).csv")
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
@@ -40,7 +41,7 @@ pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Docume
 
 
 ################ Read Data Fixed files ####################
-active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
+# active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
 majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 # r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
@@ -59,6 +60,7 @@ stage_3_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S
 stage_1_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP CapS1 Comment Latest.xlsx")
 comp_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Component Type.xlsx")
 storage_temp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Storage Temp.xlsx")
+process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -88,12 +90,20 @@ pcs_all_comments %>%
 pcs_rnd_primary_pack_graphics %>% 
   janitor::clean_names() %>% 
   dplyr::filter(role_name == "R&D Primary") %>% 
+  dplyr::mutate(project_number_2 = project_number) %>%
+  dplyr::rename(project_number = project_number_2,
+                project_number_2 = project_number) %>%
+  dplyr::relocate(project_number) %>% 
   data.frame() -> r_d_primary
 
 ##################### (Packing Specialist tab) #####################
 pcs_rnd_primary_pack_graphics %>% 
   janitor::clean_names() %>% 
   dplyr::filter(role_name == "Packaging Specialist") %>% 
+  dplyr::mutate(project_number_2 = project_number) %>%
+  dplyr::rename(project_number = project_number_2,
+                project_number_2 = project_number) %>%
+  dplyr::relocate(project_number) %>% 
   data.frame() -> packaging_specialist
 
 
@@ -108,8 +118,29 @@ projectlist %>%
   readr::type_convert() -> project_coordinator
 
 
+##################### (Active Pack Comp Tab) #####################
+pcs_active_pack_components %>% 
+  janitor::clean_names() %>% 
+  dplyr::mutate(projloc = paste0(project_number, pcs_manufacturing_location)) %>% 
+  dplyr::relocate(projloc) -> active_pack_comp
 
 
+##################### (Process Type 2 Tab) #####################
+process_type %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(processing_attribute_type = process_identifier,
+                processing_type_desc = process_attribute) %>% 
+  dplyr::select(1, 2) -> process_type_desc
+
+
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(project_number, processing_attribute_type) %>% 
+  dplyr::left_join(process_type_desc) %>% 
+  dplyr::mutate(processing_attribute_type = replace(processing_attribute_type, is.na(processing_attribute_type) | processing_attribute_type == 0, "-")) %>% 
+  dplyr::mutate(processing_type_desc = replace(processing_type_desc, is.na(processing_type_desc) | processing_type_desc == 0, "-")) -> process_type_2_tab
+  
+process_type_2_tab[!duplicated(process_type_2_tab[,c("project_number")]),] -> process_type_2_tab
 
 
 ##################### (Data - MFG Locs tab) #####################
@@ -455,8 +486,7 @@ data_mfg_locs_tab %>%
 r_d_primary %>% 
   janitor::clean_names() %>% 
   dplyr::select(1, 6) %>% 
-  dplyr::rename(project_number = project_number_1,
-                r_d_primary = responsible_user_name) -> r_d_primary
+  dplyr::rename(r_d_primary = responsible_user_name) -> r_d_primary
 
 data_mfg_locs_tab %>% 
   dplyr::left_join(r_d_primary) %>% 
@@ -713,8 +743,7 @@ data_mfg_locs_tab %>%
 packaging_specialist %>% 
   dplyr::select(1, 6) %>% 
   janitor::clean_names() %>% 
-  dplyr::rename(project_number = project_number_1,
-                packaging_graphics_coordinator = responsible_user_name) -> packaging_graphics_coordinator
+  dplyr::rename(packaging_graphics_coordinator = responsible_user_name) -> packaging_graphics_coordinator
 
 
 data_mfg_locs_tab %>% 
