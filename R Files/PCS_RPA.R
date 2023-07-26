@@ -1,6 +1,6 @@
 
-# Now 15:50. 
-# Master data tab
+# Now 18:56. 
+# line 174 -> you have things to do with velocity tab
 
 
 
@@ -31,6 +31,7 @@ pcs_sales_comments <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PC
 pcs_all_comments <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS All Comments (46).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
 pcs_active_pack_components <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS Active Pack Components (42).csv")
+velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
@@ -48,7 +49,7 @@ dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
 comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status.xlsx")
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM.xlsx")
-velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
+# velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
 stocking <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Stocking.xlsx")
 master_data <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Master Data.xlsx")
@@ -141,6 +142,38 @@ all_pcs_project_with_mfg_location %>%
   dplyr::mutate(processing_type_desc = replace(processing_type_desc, is.na(processing_type_desc) | processing_type_desc == 0, "-")) -> process_type_2_tab
   
 process_type_2_tab[!duplicated(process_type_2_tab[,c("project_number")]),] -> process_type_2_tab
+
+
+##################### (Velocity Tab) #####################
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_1 = status) -> comp_velocity
+
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 2, 15) %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_2 = project_status,
+                pcs_task = task_name) -> proj_velocity
+
+velocity_opp_overview %>% 
+  janitor::clean_names() %>% 
+  dplyr::filter(project_status == "Submitted to PCS") %>% 
+  dplyr::select(pcs_fs_id_number, forecast_submission_id, operations_confirmed_capacity, capacity_confirm_date) %>% 
+  dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
+                capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
+  dplyr::left_join(comp_velocity) %>% 
+  dplyr::left_join(proj_velocity) %>% 
+  dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
+  dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
+  dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity
+
+
+
+## 18:56 You have somethings to do with NA
+
+
 
 
 ##################### (Data - MFG Locs tab) #####################
