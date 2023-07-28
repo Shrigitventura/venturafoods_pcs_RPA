@@ -1,6 +1,6 @@
 
-# Now 18:56. 
-# line 174 -> you have things to do with velocity tab
+# Now 22:21. 
+# line 274 -> you have things to do with velocity tab
 
 
 
@@ -47,7 +47,6 @@ majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/P
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 # r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status.xlsx")
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM.xlsx")
 # velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
@@ -64,6 +63,135 @@ storage_temp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Re
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
+
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+
+##################### (Velocity Tab) #####################
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072623.xlsx")
+
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_1 = status) -> comp_velocity
+
+comp_velocity[!duplicated(comp_velocity[,c("pcs_fs_id_number")]),] -> comp_velocity
+
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 2, 15) %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_2 = project_status,
+                pcs_task = task_name) -> proj_velocity
+
+proj_velocity[!duplicated(proj_velocity[,c("pcs_fs_id_number")]),] -> proj_velocity
+
+velocity_opp_overview %>% 
+  janitor::clean_names() %>% 
+  dplyr::filter(project_status == "Submitted to PCS") %>% 
+  dplyr::select(pcs_fs_id_number, forecast_submission_id, operations_confirmed_capacity, capacity_confirm_date) %>% 
+  dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
+                capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
+  dplyr::left_join(comp_velocity) %>% 
+  dplyr::left_join(proj_velocity) %>% 
+  dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
+  dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
+  dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity_1
+
+all_pcs_project_with_mfg_location %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_stage = project_status,
+                pcs_fs_id_number = project_number) -> proj_pcs_status
+
+proj_pcs_status[!duplicated(proj_pcs_status[,c("pcs_fs_id_number")]),] -> proj_pcs_status
+
+velocity_1 %>% 
+  dplyr::filter(!is.na(pcs_task)) %>% 
+  dplyr::filter(!is.na(pcs_stage)) %>% 
+  dplyr::left_join(proj_pcs_status) -> velocity_2
+
+
+comp_velocity %>% 
+  dplyr::rename(pcs_stage = pcs_stage_1) -> comp_velocity_3
+
+
+velocity_1 %>% 
+  dplyr::filter(is.na(pcs_task)) %>% 
+  dplyr::filter(is.na(pcs_stage)) %>% 
+  dplyr::left_join(comp_velocity_3) -> velocity_3
+
+velocity_3 %>% 
+  dplyr::select(1) %>% 
+  dplyr::rename(project_number = pcs_fs_id_number) %>% 
+  dplyr::mutate(status = "null") %>% 
+  dplyr::mutate(date_as_of = Sys.Date()) -> prm_stack
+
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::mutate(date_as_of = as.Date(date_as_of)) -> comp_update
+
+rbind(comp_update, prm_stack) -> comp_update_2
+
+comp_update_2
+
+writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072723.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072723.xlsx")
+
+
+
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_1 = status) -> comp_velocity
+
+comp_velocity[!duplicated(comp_velocity[,c("pcs_fs_id_number")]),] -> comp_velocity
+
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 2, 15) %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_2 = project_status,
+                pcs_task = task_name) -> proj_velocity
+
+proj_velocity[!duplicated(proj_velocity[,c("pcs_fs_id_number")]),] -> proj_velocity
+
+velocity_opp_overview %>% 
+  janitor::clean_names() %>% 
+  dplyr::filter(project_status == "Submitted to PCS") %>% 
+  dplyr::select(pcs_fs_id_number, forecast_submission_id, operations_confirmed_capacity, capacity_confirm_date) %>% 
+  dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
+                capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
+  dplyr::left_join(comp_velocity) %>% 
+  dplyr::left_join(proj_velocity) %>% 
+  dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
+  dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
+  dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity_1
+
+all_pcs_project_with_mfg_location %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_stage = project_status,
+                pcs_fs_id_number = project_number) -> proj_pcs_status
+
+proj_pcs_status[!duplicated(proj_pcs_status[,c("pcs_fs_id_number")]),] -> proj_pcs_status
+
+velocity_1 %>% 
+  dplyr::filter(!is.na(pcs_task)) %>% 
+  dplyr::filter(!is.na(pcs_stage)) %>% 
+  dplyr::left_join(proj_pcs_status) -> velocity_2
+
+velocity_1 %>% 
+  dplyr::filter(is.na(pcs_task)) -> velocity_4
+
+
+rbind(velocity_2, velocity_4) -> velocity
+
 
 ##################### (Sales Project Notes tab) #####################
 pcs_sales_comments %>% 
@@ -142,36 +270,6 @@ all_pcs_project_with_mfg_location %>%
   dplyr::mutate(processing_type_desc = replace(processing_type_desc, is.na(processing_type_desc) | processing_type_desc == 0, "-")) -> process_type_2_tab
   
 process_type_2_tab[!duplicated(process_type_2_tab[,c("project_number")]),] -> process_type_2_tab
-
-
-##################### (Velocity Tab) #####################
-comp %>% 
-  janitor::clean_names() %>% 
-  dplyr::rename(pcs_fs_id_number = project_number,
-                pcs_stage_1 = status) -> comp_velocity
-
-all_pcs_project_with_mfg_location %>% 
-  janitor::clean_names() %>% 
-  dplyr::select(1, 2, 15) %>% 
-  dplyr::rename(pcs_fs_id_number = project_number,
-                pcs_stage_2 = project_status,
-                pcs_task = task_name) -> proj_velocity
-
-velocity_opp_overview %>% 
-  janitor::clean_names() %>% 
-  dplyr::filter(project_status == "Submitted to PCS") %>% 
-  dplyr::select(pcs_fs_id_number, forecast_submission_id, operations_confirmed_capacity, capacity_confirm_date) %>% 
-  dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
-                capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
-  dplyr::left_join(comp_velocity) %>% 
-  dplyr::left_join(proj_velocity) %>% 
-  dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
-  dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
-  dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity
-
-
-
-## 18:56 You have somethings to do with NA
 
 
 
