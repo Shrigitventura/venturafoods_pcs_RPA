@@ -1,7 +1,7 @@
 
-# Now 22:21. 
-# line 274 -> you have things to do with velocity tab
-
+# Now 25:47 
+# working on majorproj_monthyr tab. all the formulas before Col AD
+# For the main board, you need to relocate them all!(At the end of the project)
 
 
 library(tidyverse)
@@ -32,6 +32,8 @@ pcs_all_comments <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
 pcs_active_pack_components <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS Active Pack Components (42).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/SRCH985853.csv")
+pcs_rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Unique Ingredients (44).csv")
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
@@ -43,7 +45,7 @@ velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&
 
 ################ Read Data Fixed files ####################
 # active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
-majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
+# majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 # r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
@@ -51,7 +53,7 @@ prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 # velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
 stocking <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Stocking.xlsx")
-master_data <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Master Data.xlsx")
+# master_data <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Master Data.xlsx")
 # snop_comment_latest <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/S&OP Comment Latest.xlsx")
 # packaging_specialist <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Packaging Specialist.xlsx")
 test <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Test Flag Code.xlsx")
@@ -61,6 +63,7 @@ stage_1_capacity_check <- read_excel("S:/Global Shared Folders/Large Documents/S
 comp_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Component Type.xlsx")
 storage_temp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Storage Temp.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -271,6 +274,31 @@ all_pcs_project_with_mfg_location %>%
   
 process_type_2_tab[!duplicated(process_type_2_tab[,c("project_number")]),] -> process_type_2_tab
 
+##################### (Master Data tab) #####################
+master_data[c(-1, -2, -3, -4, -5), ] %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(a = product_search_excel_option_finished_good) %>% 
+  tidyr::separate(a, c("a", "b", "c", "d", "e", "f", "g", "h"), sep = ",") %>% 
+  dplyr::rename("Base product code" = a,
+                "Label" = b,
+                "Sku description" = c,
+                "Bulk oil type" = d,
+                "Refrigeration code" = e,
+                "Percent of oil in product" = f,
+                "Cases per pallet" = g,
+                "Product platform" = h) %>% 
+  janitor::clean_names() %>% 
+  dplyr::mutate(percent_of_oil_in_product = as.double(percent_of_oil_in_product)) %>% 
+  dplyr::mutate(percent_of_oil = percent_of_oil_in_product * 0.01) %>% 
+  dplyr::mutate(base_product_code = as.double(base_product_code),
+                cases_per_pallet = as.double(cases_per_pallet)) -> master_data
+
+
+
+##################### (R&D Unique Ingredient Info tab) #####################
+pcs_rnd_unique_ingredient_info %>% 
+  janitor::clean_names() %>% 
+  data.frame() -> pcs_rnd_unique_ingredient_info
 
 
 
@@ -1015,8 +1043,6 @@ data_mfg_locs_tab %>%
                 duration_number_of_weeks = round(duration_number_of_weeks, 0)) -> data_mfg_locs_tab
 
 
-
-
 ##################### (Data2 - No Locs tab) #####################   
 
 # main board (col A to Q)
@@ -1159,10 +1185,11 @@ master_data %>%
   dplyr::rename(new_sku_base = base_product_code,
                 storage_temp_ref_code = refrigeration_code) -> storage_temp_ref_code
 
-storage_temp_ref_code[!duplicated(storage_temp_ref_code[,c("new_sku_base")]),] -> storage_temp_ref_code  
+storage_temp_ref_code[!duplicated(storage_temp_ref_code[,c("new_sku_base")]),] -> storage_temp_ref_code
 
 data3_stocking_locs_tab %>% 
   dplyr::left_join(storage_temp_ref_code) -> data3_stocking_locs_tab
+
 
 
 # Storage Temp Range (Col BQ)
@@ -1170,16 +1197,53 @@ storage_temp %>%
   janitor::clean_names() %>% 
   dplyr::select(1, 4) %>% 
   dplyr::rename(storage_temp_ref_code = ref_code,
-                storage_temp_range = range) -> storage_temp_range
+                storage_temp_range = range)-> storage_temp_range
+
 
 data3_stocking_locs_tab %>% 
   dplyr::left_join(storage_temp_range) -> data3_stocking_locs_tab
 
 
 
+##################### (MajorProj MonthYr tab) #####################
+
+# Project Number (Col A)
+data_mfg_locs_tab %>% 
+  dplyr::select(project_number) -> majorproj_monthyr
+
+majorproj_monthyr[!duplicated(majorproj_monthyr[,c("project_number")]),] %>% 
+  data.frame() %>% 
+  dplyr::rename(project_number = ".") -> majorproj_monthyr
+
+# Major initative (Col B)
+mpi %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 3) -> mpi_major_initiative
+
+mpi_major_initiative[!duplicated(mpi_major_initiative[,c("project_number")]),] -> mpi_major_initiative
+
+majorproj_monthyr %>% 
+  dplyr::left_join(mpi_major_initiative) -> majorproj_monthyr
 
 
+# Desired Launch Date (Col J)
+data_mfg_locs_tab %>% 
+  dplyr::select(1, 33) -> majorproj_monthyr_desired_launch_date
+
+majorproj_monthyr %>% 
+  dplyr::left_join(majorproj_monthyr_desired_launch_date) -> majorproj_monthyr
 
 
-  
+# Desired Launch Year (Col E)
+majorproj_monthyr %>% 
+  dplyr::mutate(desired_launch_year = lubridate::year(desired_launch_date)) -> majorproj_monthyr
+
+# Desired Launch Month (Col D)
+majorproj_monthyr %>% 
+  dplyr::mutate(desired_launch_year = lubridate::month(desired_launch_date)) -> majorproj_monthyr
+
+# Desired launch month name (Col C)
+majorproj_monthyr %>% 
+  dplyr::mutate(desired_launch_month_name = lubridate::month(desired_launch_date, label = TRUE)) -> majorproj_monthyr
+
 
