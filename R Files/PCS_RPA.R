@@ -1,5 +1,6 @@
 
 # Now 25:47 
+# Line 488
 # working on majorproj_monthyr tab. all the formulas before Col AD
 # For the main board, you need to relocate them all!(At the end of the project)
 
@@ -45,7 +46,7 @@ pcs_rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Docum
 
 ################ Read Data Fixed files ####################
 # active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
-# majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
+majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 # r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
@@ -64,6 +65,10 @@ comp_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Repor
 storage_temp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Storage Temp.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
+coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
+type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Type.xlsx")
+approver <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Channel Approver.xlsx")
+
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -302,6 +307,188 @@ pcs_rnd_unique_ingredient_info %>%
 
 
 
+##################### (MajorProj MonthYr tab) #####################
+
+# Project Number (Col A)
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(project_number) -> majorproj_monthyr
+
+majorproj_monthyr[!duplicated(majorproj_monthyr[,c("project_number")]),] %>% 
+  data.frame() %>% 
+  dplyr::rename(project_number = ".") -> majorproj_monthyr
+
+# Major initative (Col B)
+mpi %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 3) -> mpi_major_initiative
+
+mpi_major_initiative[!duplicated(mpi_major_initiative[,c("project_number")]),] -> mpi_major_initiative
+
+majorproj_monthyr %>% 
+  dplyr::left_join(mpi_major_initiative) -> majorproj_monthyr
+
+
+# Desired Launch Date (Col J)
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(1, 33) -> majorproj_monthyr_desired_launch_date
+
+majorproj_monthyr_desired_launch_date[!duplicated(majorproj_monthyr_desired_launch_date[,c("project_number")]),] -> majorproj_monthyr_desired_launch_date
+
+majorproj_monthyr %>% 
+  dplyr::left_join(majorproj_monthyr_desired_launch_date) -> majorproj_monthyr
+
+
+# Desired Launch Year (Col E)
+majorproj_monthyr %>% 
+  dplyr::mutate(desired_launch_year = lubridate::year(desired_launch_date)) -> majorproj_monthyr
+
+# Desired Launch Month (Col D)
+majorproj_monthyr %>% 
+  dplyr::mutate(desired_launch_year = lubridate::month(desired_launch_date)) -> majorproj_monthyr
+
+# Desired launch month name (Col C)
+majorproj_monthyr %>% 
+  dplyr::mutate(desired_launch_month_name = lubridate::month(desired_launch_date, label = TRUE)) -> majorproj_monthyr
+
+# Project Coordinator (Col F)
+coordinator %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = project_id) -> coordinator_1
+
+majorproj_monthyr %>% 
+  dplyr::left_join(coordinator_1) -> majorproj_monthyr
+
+# Proj Type Desc (Col I)
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(1, 6) %>% 
+  dplyr::rename(proj_type_desc = project_type) -> proj_type_desc
+
+proj_type_desc[!duplicated(proj_type_desc[,c("project_number")]),] -> proj_type_desc
+
+majorproj_monthyr %>% 
+  dplyr::left_join(proj_type_desc) -> majorproj_monthyr
+
+# Project Type Shortened (Col G)
+type %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 3) %>% 
+  dplyr::rename(proj_type_desc = project_type_description) -> project_type_shortened_for_majorproj
+
+project_type_shortened_for_majorproj[!duplicated(project_type_shortened_for_majorproj[,c("proj_type_desc")]),] -> project_type_shortened_for_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(project_type_shortened_for_majorproj) -> majorproj_monthyr
+
+
+# Processing Type (Col H)
+process_type_2_tab %>% 
+  dplyr::select(1, 3) %>% 
+  dplyr::rename(processing_type = processing_type_desc) -> processing_type_for_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(processing_type_for_majorproj) -> majorproj_monthyr
+
+
+# Status (Col K)
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(1, 2)  %>% 
+  dplyr::rename(status = project_status) -> status
+
+status[!duplicated(status[,c("project_number")]),] -> status
+
+majorproj_monthyr %>% 
+  dplyr::left_join(status) -> majorproj_monthyr
+
+
+# Submitted Date (Col O)
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(1, 5) %>% 
+  dplyr::rename(submitted_date = project_submitted_date) -> submitted_date
+
+submitted_date[!duplicated(submitted_date[,c("project_number")]),] -> submitted_date
+
+majorproj_monthyr %>% 
+  dplyr::left_join(submitted_date) -> majorproj_monthyr
+
+# Submitted Year (Col N)
+majorproj_monthyr %>% 
+  dplyr::mutate(submitted_year = lubridate::year(submitted_date)) -> majorproj_monthyr
+
+
+# Submitted Month (Col M)
+majorproj_monthyr %>% 
+  dplyr::mutate(submitted_month = lubridate::month(submitted_date)) -> majorproj_monthyr
+
+
+# Submitted Month (Col M)
+majorproj_monthyr %>% 
+  dplyr::mutate(submitted_month = lubridate::month(submitted_date)) -> majorproj_monthyr
+
+# Submitted Month Name (Col L)
+majorproj_monthyr %>% 
+  dplyr::mutate(submitted_month_name = lubridate::month(submitted_date, label = TRUE)) -> majorproj_monthyr
+
+
+# Requestor (Col P)
+all_pcs_project_with_mfg_location %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(1, 4) -> requestor_latest_for_majorproj
+
+requestor_latest_for_majorproj[!duplicated(requestor_latest_for_majorproj[,c("project_number")]),] -> requestor_latest_for_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(requestor_latest_for_majorproj) -> majorproj_monthyr
+
+# Requestor First Name & Last Name (Col Z & AA)
+majorproj_monthyr %>% 
+  tidyr::separate(requestor, c("requestor_first_name", "requestor_last_name")) %>% 
+  dplyr::mutate(requestor = paste(requestor_first_name, requestor_last_name)) -> majorproj_monthyr
+
+
+# Requestor ref (Col AB)
+majorproj_monthyr %>% 
+  dplyr::mutate(requestor_ref = paste0(stringr::str_sub(requestor_first_name, 1, 1), requestor_last_name)) -> majorproj_monthyr
+
+
+# Channel 1 Approver (Col Q)
+approver %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 2) %>% 
+  dplyr::rename(requestor_ref = project_requestor,
+                channel_1_approver = level_1_approver) -> approver_channel_1_for_majorproj
+
+approver_channel_1_for_majorproj[!duplicated(approver_channel_1_for_majorproj[,c("requestor_ref")]),] -> approver_channel_1_for_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(approver_channel_1_for_majorproj) -> majorproj_monthyr
+
+
+# Channel 2 Approver (Col R)
+approver %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 3) %>% 
+  dplyr::rename(requestor_ref = project_requestor,
+                channel_2_approver = level_2_approver) -> approver_channel_2_for_majorproj_2
+
+approver_channel_2_for_majorproj_2[!duplicated(approver_channel_2_for_majorproj_2[,c("requestor_ref")]),] -> approver_channel_2_for_majorproj_2
+
+majorproj_monthyr %>% 
+  dplyr::left_join(approver_channel_2_for_majorproj_2) %>% 
+  dplyr::mutate(channel_2_approver = ifelse(is.na(channel_2_approver), "-", channel_2_approver)) -> majorproj_monthyr
+
+
+
 ##################### (Data - MFG Locs tab) #####################
 # main board (col A to BD)
 all_pcs_project_with_mfg_location %>% 
@@ -375,10 +562,10 @@ majorproj_monthyr %>%
   data.frame() %>% 
   janitor::clean_names() %>% 
   dplyr::select(1:2) %>% 
-  dplyr::rename(mpi = major_initative) -> mpi
+  dplyr::rename(mpi = major_initative) -> mpi_1
 
 data_mfg_locs_tab %>% 
-  dplyr::left_join(mpi) -> data_mfg_locs_tab
+  dplyr::left_join(mpi_1) -> data_mfg_locs_tab
 
 # Desired launch month (Col BI)
 majorproj_monthyr %>% 
@@ -1057,7 +1244,7 @@ data2_no_locs_tab %>%
 
 # MPI (Col R)
 data2_no_locs_tab %>% 
-  dplyr::left_join(mpi) -> data2_no_locs_tab
+  dplyr::left_join(mpi_1) -> data2_no_locs_tab
 
 # Desired Launch Year (Col S)
 data2_no_locs_tab %>% 
@@ -1205,45 +1392,7 @@ data3_stocking_locs_tab %>%
 
 
 
-##################### (MajorProj MonthYr tab) #####################
-
-# Project Number (Col A)
-data_mfg_locs_tab %>% 
-  dplyr::select(project_number) -> majorproj_monthyr
-
-majorproj_monthyr[!duplicated(majorproj_monthyr[,c("project_number")]),] %>% 
-  data.frame() %>% 
-  dplyr::rename(project_number = ".") -> majorproj_monthyr
-
-# Major initative (Col B)
-mpi %>% 
-  janitor::clean_names() %>% 
-  dplyr::select(1, 3) -> mpi_major_initiative
-
-mpi_major_initiative[!duplicated(mpi_major_initiative[,c("project_number")]),] -> mpi_major_initiative
-
-majorproj_monthyr %>% 
-  dplyr::left_join(mpi_major_initiative) -> majorproj_monthyr
 
 
-# Desired Launch Date (Col J)
-data_mfg_locs_tab %>% 
-  dplyr::select(1, 33) -> majorproj_monthyr_desired_launch_date
-
-majorproj_monthyr %>% 
-  dplyr::left_join(majorproj_monthyr_desired_launch_date) -> majorproj_monthyr
-
-
-# Desired Launch Year (Col E)
-majorproj_monthyr %>% 
-  dplyr::mutate(desired_launch_year = lubridate::year(desired_launch_date)) -> majorproj_monthyr
-
-# Desired Launch Month (Col D)
-majorproj_monthyr %>% 
-  dplyr::mutate(desired_launch_year = lubridate::month(desired_launch_date)) -> majorproj_monthyr
-
-# Desired launch month name (Col C)
-majorproj_monthyr %>% 
-  dplyr::mutate(desired_launch_month_name = lubridate::month(desired_launch_date, label = TRUE)) -> majorproj_monthyr
 
 
