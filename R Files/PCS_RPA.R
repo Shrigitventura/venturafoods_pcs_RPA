@@ -1,6 +1,6 @@
 
 # Now 25:47 
-# Line 488
+# Line 577
 # working on majorproj_monthyr tab. all the formulas before Col AD
 # For the main board, you need to relocate them all!(At the end of the project)
 
@@ -15,8 +15,6 @@ library(skimr)
 library(janitor)
 library(lubridate)
 library(rio)
-
-# Question #1: "MajorProj MonthYr" is this changing data?
 
 
 # Sdrive - Global Shared - Large - S&OP - PCS - Reporting - Stans's folder
@@ -68,7 +66,7 @@ mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
 type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Type.xlsx")
 approver <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Channel Approver.xlsx")
-
+sales_project_notes <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Sales Project Notes.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -486,6 +484,97 @@ approver_channel_2_for_majorproj_2[!duplicated(approver_channel_2_for_majorproj_
 majorproj_monthyr %>% 
   dplyr::left_join(approver_channel_2_for_majorproj_2) %>% 
   dplyr::mutate(channel_2_approver = ifelse(is.na(channel_2_approver), "-", channel_2_approver)) -> majorproj_monthyr
+
+
+# Sales Project Notes (Col S)
+sales_project_notes %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(sales_project_notes = pcs_comment) %>% 
+  dplyr::select(1, 3) -> sales_project_notes_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(sales_project_notes_majorproj) %>% 
+  dplyr::mutate(sales_project_notes = ifelse(is.na(sales_project_notes), "-", sales_project_notes)) -> majorproj_monthyr
+
+# Sales Project Note Timestamp (Col T)
+sales_project_notes %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(sales_project_notes_timestamp = pcs_comment_last_updated_date) %>% 
+  dplyr::select(1, 4) -> sales_project_notes_timestamp_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(sales_project_notes_timestamp_majorproj) %>% 
+  dplyr::mutate(sales_project_notes_timestamp = as.Date(sales_project_notes_timestamp)) -> majorproj_monthyr
+
+# Sales Comment Author (Col U)
+sales_project_notes %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 5) %>% 
+  dplyr::rename(sales_comment_author = pcs_comment_last_updated_by) -> sales_comment_author_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(sales_comment_author_majorproj) %>% 
+  dplyr::mutate(sales_comment_author = ifelse(is.na(sales_comment_author), "-", sales_comment_author)) -> majorproj_monthyr
+
+
+# Latest Comment Type (Col V)
+project_comment_latest_tab %>% 
+  dplyr::select(1, 2) %>% 
+  dplyr::rename(latest_comment_type = pcs_comment_type) -> latest_majorproj
+
+latest_majorproj[!duplicated(latest_majorproj[,c("project_number")]),] -> latest_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(latest_majorproj) -> majorproj_monthyr
+
+
+# Latest Comment (Col W)
+project_comment_latest_tab %>% 
+  dplyr::select(1, 3) %>% 
+  dplyr::rename(latest_comment = pcs_comment) -> latest_comment_majorproj
+
+latest_comment_majorproj[!duplicated(latest_comment_majorproj[,c("project_number")]),] -> latest_comment_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(latest_comment_majorproj) -> majorproj_monthyr
+
+
+# Latest Comment Date (Col X)
+project_comment_latest_tab %>% 
+  dplyr::select(1, 4) %>% 
+  dplyr::rename(latest_comment_date = pcs_comment_last_updated_date) -> latest_comment_date_majorproj
+
+latest_comment_date_majorproj[!duplicated(latest_comment_date_majorproj[,c("project_number")]),] -> latest_comment_date_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(latest_comment_date_majorproj) -> majorproj_monthyr
+
+
+# Latest Comment Author (Col Y)
+project_comment_latest_tab %>% 
+  dplyr::select(1, 5) %>% 
+  dplyr::rename(latest_comment_author = pcs_comment_last_updated_by) -> latest_comment_author_majorproj
+
+latest_comment_author_majorproj[!duplicated(latest_comment_author_majorproj[,c("project_number")]),] -> latest_comment_author_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(latest_comment_author_majorproj) -> majorproj_monthyr
+
+
+
+# Today's date (Col AD)
+majorproj_monthyr %>% 
+  dplyr::mutate(today = Sys.Date()) -> majorproj_monthyr
+
+
+# number_of_days_since_projet_was_created (Col AC)
+majorproj_monthyr %>% 
+  dplyr::mutate(number_of_days_since_the_project = today - submitted_date) %>% 
+  dplyr::mutate(number_of_days_since_the_project = gsub("days", "", number_of_days_since_the_project)) -> majorproj_monthyr
+
 
 
 
