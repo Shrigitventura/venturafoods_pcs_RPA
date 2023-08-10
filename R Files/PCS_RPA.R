@@ -48,7 +48,7 @@ majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/P
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 # r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
-prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM.xlsx")
+prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM.xlsx")                            # before MajorProj tab
 # velocity <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Velocity.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
 stocking <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Stocking.xlsx")
@@ -67,6 +67,9 @@ coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Rep
 type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Type.xlsx")
 approver <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Channel Approver.xlsx")
 sales_project_notes <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Sales Project Notes.xlsx")
+clean <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/clean.xlsx")
+customerprojref <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/CustomerProjRef Tab.xlsx") # before MajorProj tab
+export_region <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/export region.xlsx")
 
 ################# ETL (Extract, Transform, Load) ###################
 
@@ -302,6 +305,11 @@ master_data[c(-1, -2, -3, -4, -5), ] %>%
 pcs_rnd_unique_ingredient_info %>% 
   janitor::clean_names() %>% 
   data.frame() -> pcs_rnd_unique_ingredient_info
+
+##################### (CleanCustRef Tab) #####################
+clean %>% 
+  data.frame() %>% 
+  janitor::clean_names() -> clean_tab
 
 
 
@@ -575,6 +583,85 @@ majorproj_monthyr %>%
   dplyr::mutate(number_of_days_since_the_project = today - submitted_date) %>% 
   dplyr::mutate(number_of_days_since_the_project = gsub("days", "", number_of_days_since_the_project)) -> majorproj_monthyr
 
+
+# Actual Completed date (Col AE)
+all_pcs_project_with_mfg_location %>% 
+  dplyr::select(1, 34) %>% 
+  janitor::clean_names() -> actual_completion_date
+
+actual_completion_date[!duplicated(actual_completion_date[,c("project_number")]),] -> actual_completion_date
+
+majorproj_monthyr %>% 
+  dplyr::left_join(actual_completion_date) -> majorproj_monthyr
+
+
+# Actual Comp Month (Col AF)
+majorproj_monthyr %>% 
+  dplyr::mutate(actual_comp_month = month(actual_completion_date)) -> majorproj_monthyr
+
+
+# Actual Comp Year (Col AG)
+majorproj_monthyr %>% 
+  dplyr::mutate(actual_comp_year = year(actual_completion_date)) -> majorproj_monthyr
+
+# Customer Clean (Col AH)
+customerprojref %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 5) -> customer_clean_majorproj
+
+customer_clean_majorproj[!duplicated(customer_clean_majorproj[,c("project_number")]),] -> customer_clean_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(customer_clean_majorproj) -> majorproj_monthyr
+
+
+# Export Region Code (Col AJ)
+all_pcs_project_with_mfg_location %>% 
+  dplyr::select(1, 41) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(export_region_code = export_region)-> export_region_majorproj
+
+export_region_majorproj[!duplicated(export_region_majorproj[,c("project_number")]),] -> export_region_code_majorproj
+
+
+majorproj_monthyr %>% 
+  dplyr::left_join(export_region_code_majorproj) -> majorproj_monthyr
+
+# Export Region Code (Col AK)
+export_region %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(export_region_code = pcs_export_region_code_translation,
+                export_region = x2) -> export_region_majorproj
+
+majorproj_monthyr %>% 
+  dplyr::left_join(export_region_majorproj) -> majorproj_monthyr
+
+# PRM Date (Col AL)
+prm %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> prm_majorproj
+
+prm_majorproj[!duplicated(prm_majorproj[,c("project_number")]),] -> prm_majorproj
+
+majorproj_monthyr %>%
+  dplyr::left_join(prm_majorproj) -> majorproj_monthyr
+
+
+# PRM Topic (Col AM)
+prm %>% 
+  dplyr::select(1, 3) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(project_number = pcs_number) %>% 
+  dplyr::mutate(project_number = as.double(project_number)) -> prm_topic_majorproj
+
+
+prm_topic_majorproj[!duplicated(prm_topic_majorproj[,c("project_number")]),] -> prm_topic_majorproj
+
+majorproj_monthyr %>%
+  dplyr::left_join(prm_topic_majorproj) -> majorproj_monthyr
 
 
 
