@@ -1,6 +1,12 @@
 
-# Now 25:47 
+# Now 26:08 
 # Line 577
+
+# for MajorProj Tab below...
+# I skipped ReqLatest Tab in the video (see if it's necessary in the later video)  26:08 ~ 
+# CustomerProjRef is before MajorProj Tab 26:56
+# MPI is also the stack thing 29:07 this is also for MajorProj
+
 # working on majorproj_monthyr tab. all the formulas before Col AD
 # For the main board, you need to relocate them all!(At the end of the project)
 
@@ -200,6 +206,7 @@ velocity_1 %>%
 
 
 rbind(velocity_2, velocity_4) -> velocity
+
 
 
 ##################### (Sales Project Notes tab) #####################
