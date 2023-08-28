@@ -1,6 +1,5 @@
 
 # Now 26:08 
-# Line 577
 
 # for MajorProj Tab below...
 # I skipped ReqLatest Tab in the video (see if it's necessary in the later video)  26:08 ~ 
@@ -50,7 +49,7 @@ pcs_rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Docum
 
 ################ Read Data Fixed files ####################
 # active_pack_comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Active Pack Comp.xlsx")
-majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
+# majorproj_monthyr <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MajorProj MonthYr.xlsx")
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/DSX.xlsx")
 # r_d_primary <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/R & D Primary.xlsx")
 minimums <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Minimums.xlsx")
