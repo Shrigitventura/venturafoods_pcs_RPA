@@ -16,12 +16,185 @@ library(rio)
 ################ Read original files ####################
 
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - With MFG Locations (59).csv")
-
+pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
+velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072623.xlsx")
 
 
 ################ Read Data Fixed files ####################
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
+process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
+macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
+
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+
+##################### (Velocity Tab) #####################
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_1 = status) -> comp_velocity
+
+comp_velocity[!duplicated(comp_velocity[,c("pcs_fs_id_number")]),] -> comp_velocity
+
+mfg_location_tab_raw %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 2, 15) %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_2 = project_status,
+                pcs_task = task_name) -> proj_velocity
+
+proj_velocity[!duplicated(proj_velocity[,c("pcs_fs_id_number")]),] -> proj_velocity
+
+velocity_opp_overview %>% 
+  janitor::clean_names() %>% 
+  dplyr::filter(project_status == "Submitted to PCS") %>% 
+  dplyr::select(pcs_fs_id_number, forecast_submission_id, operations_confirmed_capacity, capacity_confirm_date) %>% 
+  dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
+                capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
+  dplyr::left_join(comp_velocity) %>% 
+  dplyr::left_join(proj_velocity) %>% 
+  dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
+  dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
+  dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity_1
+
+
+mfg_location_tab_raw %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_stage = project_status,
+                pcs_fs_id_number = project_number) -> proj_pcs_status
+
+proj_pcs_status[!duplicated(proj_pcs_status[,c("pcs_fs_id_number")]),] -> proj_pcs_status
+
+velocity_1 %>% 
+  dplyr::filter(!is.na(pcs_task)) %>% 
+  dplyr::filter(!is.na(pcs_stage)) %>% 
+  dplyr::left_join(proj_pcs_status) -> velocity_2
+
+
+comp_velocity %>% 
+  dplyr::rename(pcs_stage = pcs_stage_1) -> comp_velocity_3
+
+
+velocity_1 %>% 
+  dplyr::filter(is.na(pcs_task)) %>% 
+  dplyr::filter(is.na(pcs_stage)) %>% 
+  dplyr::left_join(comp_velocity_3) -> velocity_3
+
+velocity_3 %>% 
+  dplyr::select(1) %>% 
+  dplyr::rename(project_number = pcs_fs_id_number) %>% 
+  dplyr::mutate(status = "null") %>% 
+  dplyr::mutate(date_as_of = Sys.Date()) -> prm_stack
+
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::mutate(date_as_of = as.Date(date_as_of)) -> comp_update
+
+rbind(comp_update, prm_stack) -> comp_update_2
+
+comp_update_2
+
+# Drag up to here right above line, and name your file below in the directory
+
+writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072723.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072723.xlsx")
+
+
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+
+comp %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_1 = status) -> comp_velocity
+
+comp_velocity[!duplicated(comp_velocity[,c("pcs_fs_id_number")]),] -> comp_velocity
+
+mfg_location_tab_raw %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 2, 15) %>% 
+  dplyr::rename(pcs_fs_id_number = project_number,
+                pcs_stage_2 = project_status,
+                pcs_task = task_name) -> proj_velocity
+
+proj_velocity[!duplicated(proj_velocity[,c("pcs_fs_id_number")]),] -> proj_velocity
+
+velocity_opp_overview %>% 
+  janitor::clean_names() %>% 
+  dplyr::filter(project_status == "Submitted to PCS") %>% 
+  dplyr::select(pcs_fs_id_number, forecast_submission_id, operations_confirmed_capacity, capacity_confirm_date) %>% 
+  dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
+                capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
+  dplyr::left_join(comp_velocity) %>% 
+  dplyr::left_join(proj_velocity) %>% 
+  dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
+  dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
+  dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity_1
+
+mfg_location_tab_raw %>% 
+  dplyr::select(1, 2) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(pcs_stage = project_status,
+                pcs_fs_id_number = project_number) -> proj_pcs_status
+
+proj_pcs_status[!duplicated(proj_pcs_status[,c("pcs_fs_id_number")]),] -> proj_pcs_status
+
+velocity_1 %>% 
+  dplyr::filter(!is.na(pcs_task)) %>% 
+  dplyr::filter(!is.na(pcs_stage)) %>% 
+  dplyr::left_join(proj_pcs_status) -> velocity_2
+
+velocity_1 %>% 
+  dplyr::filter(is.na(pcs_task)) -> velocity_4
+
+
+rbind(velocity_2, velocity_4) -> velocity
+
+
+
+##################### (Process Type 2 Tab) #####################
+process_type %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(processing_attribute_type = process_identifier,
+                processing_type_desc = process_attribute) %>% 
+  dplyr::select(1, 2) -> process_type_desc
+
+
+mfg_location_tab_raw %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(project_number, processing_attribute_type) %>% 
+  dplyr::left_join(process_type_desc) %>% 
+  dplyr::mutate(processing_attribute_type = replace(processing_attribute_type, is.na(processing_attribute_type) | processing_attribute_type == 0, "-")) %>% 
+  dplyr::mutate(processing_type_desc = replace(processing_type_desc, is.na(processing_type_desc) | processing_type_desc == 0, "-")) -> process_type_2_tab
+
+process_type_2_tab[!duplicated(process_type_2_tab[,c("project_number")]),] -> process_type_2_tab
 
 
 
@@ -100,6 +273,68 @@ coordinator_data[!duplicated(coordinator_data[,c("project_number")]),] -> coordi
 
 mfg_location_tab %>% 
   dplyr::left_join(coordinator_data) -> mfg_location_tab
+
+
+# Column: Processing Type
+process_type_2_tab %>% 
+  dplyr::select(1, 3) -> process_type_desc_data
+
+mfg_location_tab %>% 
+  dplyr::left_join(process_type_desc_data) %>% 
+  dplyr::rename(processing_type = processing_type_desc) -> mfg_location_tab
+
+
+# Column: # days since project was created
+mfg_location_tab %>% 
+  dplyr::mutate(days_since_project_was_created = Sys.Date() - project_submitted_date,
+                days_since_project_was_created = as.integer(days_since_project_was_created)) -> mfg_location_tab
+
+
+# Column: Net Incremental
+mfg_location_tab %>% 
+  dplyr::mutate(net_incremental = ifelse(pcs_incremental_volume > 0, pcs_incremental_volume, pcs_manufacturing_location_annual_volume_lbs))
+
+
+# Column: R&D Primary
+pcs_rnd_primary_pack_graphics %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(project_number, responsible_user_name) -> responsible_user_name_data
+
+responsible_user_name_data[!duplicated(responsible_user_name_data[,c("project_number")]),] -> responsible_user_name_data
+
+mfg_location_tab %>% 
+  dplyr::left_join(responsible_user_name_data) %>% 
+  dplyr::mutate(responsible_user_name = ifelse(is.na(responsible_user_name), "-", responsible_user_name)) -> mfg_location_tab
+
+
+# Column: Velocity Opp
+velocity %>% 
+  dplyr::select(1, 2) %>% 
+  dplyr::rename(project_number = pcs_fs_id_number,
+                velocity_opp = forecast_submission_id) -> velocity_data
+
+mfg_location_tab %>% 
+  dplyr::left_join(velocity_data) %>% 
+  dplyr::mutate(velocity_opp = ifelse(is.na(velocity_opp), "-", velocity_opp)) -> mfg_location_tab
+
+
+# Column: Macro Platform
+macro %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(1, 4) %>% 
+  dplyr::rename(platform_and_packaging_type = platform_1) -> macro_data
+
+
+mfg_location_tab %>% 
+  dplyr::left_join(macro_data) %>% 
+  dplyr::mutate(macro_platform = ifelse(is.na(macro_platform), "-", macro_platform)) -> mfg_location_tab
+
+
+# Column: Past Due
+mfg_location_tab %>% 
+  dplyr::mutate(past_due = desired_launch_date - Sys.Date(),
+                past_due = as.integer(past_due)) -> mfg_location_tab
 
 
 
