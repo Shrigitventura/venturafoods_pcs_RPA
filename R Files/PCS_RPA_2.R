@@ -19,6 +19,7 @@ mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM & PRM Status.xlsx")
+rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Unique Ingredients (44).csv")
 
 ################ Read Data Fixed files ####################
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
@@ -416,6 +417,14 @@ velocity %>%
   dplyr::mutate(dplyr::across(contains("date"), ~ as.Date(.x, format="%Y-%m-%d"))) %>%
   dplyr::mutate(dplyr::across(contains("date"), ~ format(.x, "%m/%d/%Y"))) -> velocity
 
+
+
+##################### (Data - MFG Locs tab) #####################
+rnd_unique_ingredient_info %>% 
+  janitor::clean_names() %>% 
+  data.frame() -> rnd_unique_ingredient_info
+
+
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
@@ -435,12 +444,14 @@ velocity %>%
 ### Exporting ###
 
 list("Data" = mfg_location_tab,
-     "Velocity" = velocity) -> list_of_dfs
+     "Velocity" = velocity,
+     "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
 writexl::write_xlsx(list_of_dfs, "test.xlsx")
 
 
 
+mfg_location_tab$pcs_mfg_loc_annual
 
 
 
