@@ -18,7 +18,7 @@ library(rio)
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - With MFG Locations (59).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
-prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM & PRM Status.xlsx")
+prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM.xlsx")
 rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Unique Ingredients (44).csv")
 
 ################ Read Data Fixed files ####################
@@ -26,6 +26,7 @@ mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean.xlsx")
 
 ##############################################################################################################################################################
 ##############################################################################################################################################################
@@ -294,7 +295,7 @@ mfg_location_tab %>%
 
 # Column: Net Incremental
 mfg_location_tab %>% 
-  dplyr::mutate(net_incremental = ifelse(pcs_incremental_volume > 0, pcs_incremental_volume, pcs_manufacturing_location_annual_volume_lbs))
+  dplyr::mutate(net_incremental = ifelse(pcs_incremental_volume > 0, pcs_incremental_volume, pcs_manufacturing_location_annual_volume_lbs)) -> mfg_location_tab
 
 
 # Column: R&D Primary
@@ -307,7 +308,8 @@ responsible_user_name_data[!duplicated(responsible_user_name_data[,c("project_nu
 
 mfg_location_tab %>% 
   dplyr::left_join(responsible_user_name_data) %>% 
-  dplyr::mutate(responsible_user_name = ifelse(is.na(responsible_user_name), "-", responsible_user_name)) -> mfg_location_tab
+  dplyr::mutate(responsible_user_name = ifelse(is.na(responsible_user_name), "-", responsible_user_name)) %>% 
+  dplyr::rename(rnd_primary = responsible_user_name) -> mfg_location_tab
 
 
 # Column: Velocity Opp
@@ -406,6 +408,16 @@ mfg_location_tab %>%
   dplyr::mutate(prm_submit_year = lubridate::year(prm_date)) -> mfg_location_tab
 
 
+# Column: Clean Customer
+clean_customer %>% 
+  janitor::clean_names() %>% 
+  data.frame() -> clean_customer_data
+
+clean_customer_data[!duplicated(clean_customer_data[,c("pcs_customer_name")]),] -> clean_customer_data
+
+mfg_location_tab %>% 
+  dplyr::left_join(clean_customer_data) -> mfg_location_tab
+
 # Date format work
 mfg_location_tab %>% 
   dplyr::mutate(dplyr::across(contains("date"), ~ as.Date(.x, format="%Y-%m-%d"))) %>%
@@ -419,7 +431,7 @@ velocity %>%
 
 
 
-##################### (Data - MFG Locs tab) #####################
+##################### (R&D Unique Ingredients) #####################
 rnd_unique_ingredient_info %>% 
   janitor::clean_names() %>% 
   data.frame() -> rnd_unique_ingredient_info
@@ -447,12 +459,7 @@ list("Data" = mfg_location_tab,
      "Velocity" = velocity,
      "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
-writexl::write_xlsx(list_of_dfs, "test.xlsx")
-
-
-
-mfg_location_tab$pcs_mfg_loc_annual
-
+writexl::write_xlsx(list_of_dfs, "pcs_data_9.1.2023.xlsx")
 
 
 
