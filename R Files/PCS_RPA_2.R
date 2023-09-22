@@ -21,12 +21,14 @@ velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM.xlsx")
 rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Unique Ingredients (44).csv")
 
+
 ################ Read Data Fixed files ####################
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
 clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean.xlsx")
+master_data <- read_csv("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 23/PCS Automation/SRCH985853.csv")
 
 ##############################################################################################################################################################
 ##############################################################################################################################################################
