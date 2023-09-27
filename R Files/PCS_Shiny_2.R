@@ -1,3 +1,4 @@
+# Increase max upload size to 50 MB
 options(shiny.maxRequestSize = 50 * 1024 * 1024)
 
 library(shiny)
@@ -35,9 +36,17 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   observeEvent(input$run_data_change, {
-
+    inFile_mfg <- input$mfg_location
+    inFile_comp <- input$comp
+    # Additional file variables can be defined similarly
     
+    if (is.null(inFile_mfg) || is.null(inFile_comp)) {
+      return(NULL)
+    }
     
+    mfg_location_tab_raw <- read.csv(inFile_mfg$datapath)
+    comp <- read_excel(inFile_comp$datapath)
+    # Additional file read operations can go here
     
     comp %>% 
       janitor::clean_names() %>% 
@@ -103,8 +112,10 @@ server <- function(input, output, session) {
     
     rbind(comp_update, prm_stack) -> comp_update_2
     
-    comp_update_2
-    
+    output$view_comp <- renderTable({
+      comp
+    })
+
   })
 }
 
