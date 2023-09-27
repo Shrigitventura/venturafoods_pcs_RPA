@@ -21,7 +21,6 @@ velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM.xlsx")
 rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Unique Ingredients (44).csv")
 
-
 ################ Read Data Fixed files ####################
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
@@ -465,3 +464,5 @@ writexl::write_xlsx(list_of_dfs, "pcs_data_9.1.2023.xlsx")
 
 
 
+
+### CVM Customers Y/N: I have not worked on this yet
