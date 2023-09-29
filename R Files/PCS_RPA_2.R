@@ -409,7 +409,7 @@ mfg_location_tab %>%
   dplyr::mutate(prm_submit_year = lubridate::year(prm_date)) -> mfg_location_tab
 
 
-# Column: Clean Customer
+# Column: Clean Customer & CVM
 clean_customer %>% 
   janitor::clean_names() %>% 
   data.frame() -> clean_customer_data
@@ -419,16 +419,57 @@ clean_customer_data[!duplicated(clean_customer_data[,c("pcs_customer_name")]),] 
 mfg_location_tab %>% 
   dplyr::left_join(clean_customer_data) -> mfg_location_tab
 
+mfg_location_tab %>% 
+  dplyr::mutate(cvm = ifelse(is.na(cvm), "N", cvm)) -> mfg_location_tab
+
+
+# Column: MDM Total Oil %
+# Define the column names
+master_data %>% 
+  dplyr::slice(-(1:5)) %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(a = product_search_excel_option_finished_good) %>% 
+  tidyr::separate(a, c("new_sku_base", "label", "sku_description", "bulk_oil", "refrigeration_code", 
+                       "percent_of_oil_in_product", "cases_per_pallet", "product_platform"), sep = ",") %>%
+  dplyr::mutate(percent_of_oil_in_product = as.double(percent_of_oil_in_product),
+                new_sku_base = as.double(new_sku_base)) %>% 
+  dplyr::mutate(mdm_total_oil_percent = percent_of_oil_in_product * 0.01) %>% 
+  dplyr::select(new_sku_base, mdm_total_oil_percent) -> master_data_oil_percent
+
+
+mfg_location_tab %>% 
+  dplyr::left_join(master_data_oil_percent) %>% 
+  dplyr::mutate(mdm_total_oil_percent = ifelse(is.na(mdm_total_oil_percent), 0, mdm_total_oil_percent)) -> mfg_location_tab
+
+
+
+# Column: Total Incremental Oil Volume 
+mfg_location_tab %>% 
+  dplyr::mutate(net_incremental = as.double(net_incremental)) %>% 
+  dplyr::mutate(total_incremental_oil_volume = mdm_total_oil_percent * net_incremental,
+                total_incremental_oil_volume = round(total_incremental_oil_volume, 0)) -> mfg_location_tab
+
+
 # Date format work
 mfg_location_tab %>% 
   dplyr::mutate(dplyr::across(contains("date"), ~ as.Date(.x, format="%Y-%m-%d"))) %>%
   dplyr::mutate(dplyr::across(contains("date"), ~ format(.x, "%m/%d/%Y"))) -> mfg_location_tab
 
+# Data Clean Work
+mfg_location_tab %>% 
+  dplyr::mutate(total_actual_duration_days = as.numeric(total_actual_duration_days),
+                total_actual_duration_days = round(total_actual_duration_days, 0)) -> mfg_location_tab
 
+
+################################################################################################################################################################
 # Date work for Velocity Tab
 velocity %>% 
   dplyr::mutate(dplyr::across(contains("date"), ~ as.Date(.x, format="%Y-%m-%d"))) %>%
   dplyr::mutate(dplyr::across(contains("date"), ~ format(.x, "%m/%d/%Y"))) -> velocity
+
+
+  
+
 
 
 
@@ -436,6 +477,10 @@ velocity %>%
 rnd_unique_ingredient_info %>% 
   janitor::clean_names() %>% 
   data.frame() -> rnd_unique_ingredient_info
+
+
+
+
 
 
 ##############################################################################################################################################################
@@ -464,5 +509,3 @@ writexl::write_xlsx(list_of_dfs, "pcs_data_9.1.2023.xlsx")
 
 
 
-
-### CVM Customers Y/N: I have not worked on this yet
