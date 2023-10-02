@@ -15,19 +15,19 @@ library(rio)
 
 ################ Read original files ####################
 
-mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/All PCS Projects - With MFG Locations (59).csv")
-pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Primary & Pack Graphics (43).csv")
+mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/All PCS Projects - With MFG Locations (70).csv")
+pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Primary & Pack Graphics (53).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
-prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM.xlsx")
-rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Stan's folder/PCS R&D Unique Ingredients (44).csv")
+prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM.xlsx") # Discuss Tuesday (we are touching final product first)
+rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Unique Ingredients (54).csv")
 
 ################ Read Data Fixed files ####################
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI.xlsx")
-coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Project Coordinator.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/MPI.xlsx") # Discuss Tuesday (we are touching final product first)
+coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/ProjectList_10_2_2023 10_58_29 AM.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean.xlsx")
-master_data <- read_csv("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 23/PCS Automation/SRCH985853.csv")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean.xlsx") # Discuss Tuesday (we are touching final product first)
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/SRCH231771.csv")
 
 ##############################################################################################################################################################
 ##############################################################################################################################################################
@@ -44,7 +44,7 @@ master_data <- read_csv("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072623.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 9.25.23.xlsx")
 
 ##################### (Velocity Tab) #####################
 comp %>% 
@@ -102,12 +102,10 @@ velocity_1 %>%
 velocity_3 %>% 
   dplyr::select(1) %>% 
   dplyr::rename(project_number = pcs_fs_id_number) %>% 
-  dplyr::mutate(status = "null") %>% 
-  dplyr::mutate(date_as_of = Sys.Date()) -> prm_stack
+  dplyr::mutate(status = "null") -> prm_stack
 
 comp %>% 
-  janitor::clean_names() %>% 
-  dplyr::mutate(date_as_of = as.Date(date_as_of)) -> comp_update
+  janitor::clean_names() -> comp_update
 
 rbind(comp_update, prm_stack) -> comp_update_2
 
@@ -128,8 +126,8 @@ comp_update_2
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 
-writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072723.xlsx")
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 072723.xlsx")
+writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.2.23.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.2.23.xlsx")
 
 
 ######################################################################################################################################################
@@ -268,12 +266,24 @@ mfg_location_tab %>%
 
 
 # Column: Project Coordinator
+coordinator[-1:-5, -1] -> coordinator
+colnames(coordinator) <- coordinator[1, ]
+coordinator %>% 
+  dplyr::slice(-1) %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::select(project_id, project_coordinator) -> coordinator
+
+
 coordinator %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
-  dplyr::rename(project_number = project_id) -> coordinator_data
+  dplyr::rename(project_number = project_id) %>% 
+  dplyr::mutate(project_number = as.numeric(project_number)) -> coordinator_data
 
 coordinator_data[!duplicated(coordinator_data[,c("project_number")]),] -> coordinator_data
+
+
 
 mfg_location_tab %>% 
   dplyr::left_join(coordinator_data) -> mfg_location_tab
@@ -505,7 +515,7 @@ list("Data" = mfg_location_tab,
      "Velocity" = velocity,
      "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
-writexl::write_xlsx(list_of_dfs, "pcs_data_9.1.2023.xlsx")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/pcs_data_10.2.2023.xlsx")
 
 
 
