@@ -20,32 +20,35 @@ mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Primary & Pack Graphics (53).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
 rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Unique Ingredients (54).csv")
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/SRCH231771.csv")
 
 ################ Read Data Fixed files ####################
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/ProjectList_10_2_2023 10_58_29 AM.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean.xlsx") # Discuss Tuesday (we are touching final product first)
-master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/SRCH231771.csv")
 
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
 
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 9.25.23.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 9.25.23.xlsx") #input Previous week's data
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM/PRM.xlsx") # Make sure to update .xlsx file before you run this tool
+
+
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+
+pre_final_product %>% 
+  dplyr::mutate(project_submitted_date = mdy(project_submitted_date)) %>% 
+  dplyr::filter(project_submitted_date >= as.Date("2023-09-25") & project_submitted_date <= as.Date("2023-10-01")) %>%  #### Input the past date to figure out new projects ####
+  dplyr::select(project_number) -> new_projects
+
+
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/MPI.xlsx") # Discuss Tuesday (we are touching final product first)
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean.xlsx") # Discuss Tuesday (we are touching final product first)
 
 ##################### (Velocity Tab) #####################
 comp %>% 
@@ -128,6 +131,11 @@ comp_update_2
 ##############################################################################################################################################################
 
 writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.2.23.xlsx")
+
+##############################################################################################################################################################
+####################################### Now you go back to the .xlsx file & finish your manual work from PCS System ##########################################
+##############################################################################################################################################################
+
 comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.2.23.xlsx")
 
 
