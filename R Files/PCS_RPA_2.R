@@ -14,15 +14,14 @@ library(rio)
 ###########################################################################################################################################################
 
 ################ Read original files ####################
+pre_final_product <- readRDS("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/PCS/venturafoods_pcs_RPA/rds files/mfg_location_tab_9.25.2023.rds")
 
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/All PCS Projects - With MFG Locations (70).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Primary & Pack Graphics (53).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
-prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM.xlsx") # Discuss Tuesday (we are touching final product first)
 rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Unique Ingredients (54).csv")
 
 ################ Read Data Fixed files ####################
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/MPI.xlsx") # Discuss Tuesday (we are touching final product first)
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/ProjectList_10_2_2023 10_58_29 AM.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
@@ -45,6 +44,8 @@ master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Repor
 ##############################################################################################################################################################
 
 comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 9.25.23.xlsx")
+prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM/PRM.xlsx") # Make sure to update .xlsx file before you run this tool
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/MPI.xlsx") # Discuss Tuesday (we are touching final product first)
 
 ##################### (Velocity Tab) #####################
 comp %>% 
@@ -515,7 +516,9 @@ list("Data" = mfg_location_tab,
      "Velocity" = velocity,
      "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
-writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/pcs_data_10.2.2023.xlsx")
+
+saveRDS(mfg_location_tab, "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/PCS/venturafoods_pcs_RPA/rds files/mfg_location_tab_10.02.2023.rds")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/pcs_data_10.02.2023.xlsx")
 
 
 
