@@ -14,7 +14,7 @@ library(rio)
 ###########################################################################################################################################################
 
 ################ Read original files ####################
-pre_final_product <- readRDS("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/PCS/venturafoods_pcs_RPA/rds files/mfg_location_tab_09.25.2023.rds")
+pre_final_product <- read_rds("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/PCS/venturafoods_pcs_RPA/rds files/mfg_location_tab_09.25.2023.rds")
 
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/All PCS Projects - With MFG Locations (70).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Primary & Pack Graphics (53).csv")
