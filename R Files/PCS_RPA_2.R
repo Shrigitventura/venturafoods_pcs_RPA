@@ -187,6 +187,11 @@ clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/
 
 ######################################################################################################################################################
 
+# Clean customer arrange
+clean_customer %>%
+  dplyr::arrange(pcs_customer_name) -> clean_customer
+
+# Comp 
 comp %>% 
   janitor::clean_names() %>% 
   dplyr::rename(pcs_fs_id_number = project_number,
