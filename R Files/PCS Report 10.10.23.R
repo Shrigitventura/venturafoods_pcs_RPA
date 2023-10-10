@@ -14,16 +14,16 @@ library(rio)
 ###########################################################################################################################################################
 
 ################ Read original files ####################
-pre_final_product <- read_rds("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/PCS/venturafoods_pcs_RPA/rds files/mfg_location_tab_09.25.2023.rds")
+pre_final_product <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.02.2023/mfg_location_tab_10.02.2023.xlsx")
 
-mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/All PCS Projects - With MFG Locations (70).csv")
-pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Primary & Pack Graphics (53).csv")
+mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.10.23/All PCS Projects - With MFG Locations (72).csv")
+pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.10.23/PCS R&D Primary & Pack Graphics (53).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
-rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/PCS R&D Unique Ingredients (54).csv")
-master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/SRCH231771.csv")
+rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.10.23/PCS R&D Unique Ingredients (54).csv")
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.10.23/SRCH266209.csv")
 
 ################ Read Data Fixed files ####################
-coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/ProjectList_10_2_2023 10_58_29 AM.xlsx")
+coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.10.23/ProjectList_10_10_2023 11_22_04 AM.xlsx")
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
 
@@ -33,7 +33,7 @@ macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 09.25.23.xlsx") # input Previous week's data
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.02.23.xlsx") # input Previous week's data
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM/PRM.xlsx") # Make sure to update .xlsx file before you run this tool
 
 
@@ -43,12 +43,12 @@ prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 
 pre_final_product %>% 
   dplyr::mutate(project_submitted_date = lubridate::mdy(project_submitted_date)) %>% 
-  dplyr::filter(project_submitted_date >= as.Date("2023-09-25") & project_submitted_date <= as.Date("2023-10-01")) %>%  #### Input the past date to figure out new projects ####
+  dplyr::filter(project_submitted_date >= as.Date("2023-10-02") & project_submitted_date <= as.Date("2023-10-08")) %>%  #### Input the past date to figure out new projects ####
   dplyr::select(project_number) -> new_projects
 
 
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 09.25.2023.xlsx") 
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 09.25.2023.xlsx") 
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.02.2023.xlsx") 
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.02.2023.xlsx") 
 
 ##################### (Velocity Tab) #####################
 comp %>% 
@@ -173,17 +173,17 @@ rbind(clean_customer_2, new_projects_customer_clean_2) -> clean_customer_new_add
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 
-writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.02.23.xlsx")
-writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.02.2023.xlsx")
-writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.02.2023.xlsx")
+writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.10.23.xlsx")
+writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.10.2023.xlsx")
+writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.10.2023.xlsx")
 
 ##############################################################################################################################################################
 ####################################### Now you go back to the .xlsx file & finish your manual work from PCS System ##########################################
 ##############################################################################################################################################################
 
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.02.23.xlsx")
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.02.2023.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.02.2023.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.10.23.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.10.2023.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.10.2023.xlsx")
 
 ######################################################################################################################################################
 
@@ -538,7 +538,7 @@ velocity %>%
   dplyr::mutate(dplyr::across(contains("date"), ~ format(.x, "%m/%d/%Y"))) -> velocity
 
 
-  
+
 
 
 
@@ -576,8 +576,8 @@ list("Data" = mfg_location_tab,
      "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
 
-saveRDS(mfg_location_tab, "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/PCS/venturafoods_pcs_RPA/rds files/mfg_location_tab_10.02.2023.rds")
-writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/10.2.2023 testing/pcs_data_10.02.2023.xlsx")
+writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/mfg_location_tab_10.10.2023.xlsx")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/pcs_data_10.10.2023.xlsx")
 
 
 
