@@ -9,6 +9,8 @@ library(janitor)
 library(lubridate)
 library(rio)
 
+options(scipen=999)
+
 ###########################################################################################################################################################
 ############################################################# Data Input ##################################################################################
 ###########################################################################################################################################################
@@ -530,9 +532,11 @@ mfg_location_tab %>%
   dplyr::mutate(total_actual_duration_days = as.numeric(total_actual_duration_days),
                 total_actual_duration_days = round(total_actual_duration_days, 0)) -> mfg_location_tab
 
-
+# Duplication removal
 mfg_location_tab
 mfg_location_tab[!duplicated(mfg_location_tab[,c("project_number", "pcs_manufacturing_location")]),] -> mfg_location_tab
+
+
 
 
 ################################################################################################################################################################
