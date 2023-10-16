@@ -16,7 +16,7 @@ options(menu.graphics = FALSE)
 ###########################################################################################################################################################
 
 ################ Read original files ####################
-pre_final_product <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/mfg_location_tab_10.02.2023.xlsx")
+pre_final_product <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/mfg_location_tab_10.10.2023.xlsx")
 
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.16.23/All PCS Projects - With MFG Locations (72).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.16.23/PCS R&D Primary & Pack Graphics (53).csv")
