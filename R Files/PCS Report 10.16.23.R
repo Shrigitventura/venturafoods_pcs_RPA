@@ -16,8 +16,6 @@ options(scipen=999)
 ###########################################################################################################################################################
 
 ################ Read original files ####################
-pre_final_product <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/mfg_location_tab_10.10.2023.xlsx")
-
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.16.23/All PCS Projects - With MFG Locations (72).csv")
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.16.23/PCS R&D Primary & Pack Graphics (53).csv")
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
@@ -131,14 +129,15 @@ rbind(mpi_adding_new, new_projects_mpi) -> new_projects_mpi_added
 
 
 ##################### (Clean Customer) #####################
-pre_final_product %>% 
-  dplyr::select(project_number, pcs_customer_name, clean_customer) -> pre_final_clean_customer
+mfg_location_tab_raw %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(project_number, pcs_customer_name) %>% 
+  dplyr::left_join(clean_customer)-> final_clean_customer_new
 
-pre_final_clean_customer[!duplicated(pre_final_clean_customer[,c("project_number")]),] -> pre_final_clean_customer
-
+final_clean_customer_new[!duplicated(final_clean_customer_new[,c("project_number")]),] -> final_clean_customer_new
 
 new_projects %>% 
-  dplyr::left_join(pre_final_clean_customer) %>% 
+  dplyr::left_join(final_clean_customer_new) %>% 
   dplyr::select(pcs_customer_name, clean_customer) -> new_projects_customer_clean_1
 
 clean_customer %>% 
@@ -159,6 +158,11 @@ clean_customer %>%
 
 
 rbind(clean_customer_2, new_projects_customer_clean_2) -> clean_customer_new_added
+
+clean_customer_new_added[!duplicated(clean_customer_new_added[,c("pcs_customer_name")]),] -> clean_customer_new_added
+
+clean_customer_new_added %>% 
+  dplyr::filter(!is.na(pcs_customer_name)) -> clean_customer_new_added
 
 ##############################################################################################################################################################
 ##############################################################################################################################################################
