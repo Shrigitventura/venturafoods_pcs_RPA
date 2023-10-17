@@ -187,9 +187,9 @@ writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Do
 ####################################### Now you go back to the .xlsx file & finish your manual work from PCS System ##########################################
 ##############################################################################################################################################################
 
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.10.23.xlsx")
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.10.2023.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.10.2023.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.16.23.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.16.2023.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.16.2023.xlsx")
 
 ######################################################################################################################################################
 
@@ -589,8 +589,8 @@ list("Data" = mfg_location_tab,
      "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
 
-writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/mfg_location_tab_10.10.2023.xlsx")
-writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.10.2023/pcs_data_10.10.2023.xlsx")
+writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.16.2023/mfg_location_tab_10.16.2023.xlsx")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from vscode/2023/10.16.2023/pcs_data_10.16.2023.xlsx")
 
 
 
