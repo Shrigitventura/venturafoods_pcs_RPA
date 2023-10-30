@@ -272,7 +272,7 @@ process_type_2_tab[!duplicated(process_type_2_tab[,c("project_number")]),] -> pr
 mfg_location_tab_raw %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
-  dplyr::select(project_number, project_status, project_name, requestor, project_submitted_date, project_type, business_channel, pcs_product_category,
+  dplyr::select(project_number, project_status, project_name, requestor, project_submitted_date, project_type, pcs_product_name, business_channel, pcs_product_category,
                 pcs_product_sub_category, pcs_customer_name, project_minimum_met, task_name, total_actual_duration_days, stage_name, current_responsible_user_name,
                 pcs_manufacturing_location, pcs_manufacturing_location_annual_volume_lbs, total_weighted_vm_lb, pcs_manufacturing_location_annual_vm,
                 platform_and_packaging_type, pcs_incremental_volume, market_test_start_ship_date, market_test_end_ship_date, market_test_volume,
@@ -286,6 +286,9 @@ mfg_location_tab_raw %>%
 mfg_location_tab %>% 
   dplyr::mutate(dplyr::across(everything(), ~ifelse(is.na(.), "-", .))) -> mfg_location_tab
 
+# remove blank in State Name col
+mfg_location_tab %>% 
+  dplyr::filter(stage_name != "-") -> mfg_location_tab
 
 # Column: MPI
 mpi %>% 
