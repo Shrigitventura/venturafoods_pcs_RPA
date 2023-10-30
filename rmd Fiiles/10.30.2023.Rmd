@@ -1,3 +1,13 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+### Load the Libraries (click Play)
+```{r}
 library(tidyverse)
 library(magrittr)
 library(openxlsx)
@@ -10,46 +20,56 @@ library(lubridate)
 library(rio)
 
 options(scipen=999)
+```
 
-###########################################################################################################################################################
-############################################################# Data Input ##################################################################################
-###########################################################################################################################################################
-
-################ Read original files ####################
+### Read Original Raw data from the system (Click play after inputting correct resources)
+```{r}
 mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.23.23/All PCS Projects - With MFG Locations 10.23.23.csv")
+
 pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.23.23/PCS R&D Primary & Pack Graphics 10.23.23.csv")
+
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
+
 rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.23.23/PCS R&D Unique Ingredients 10.23.23.csv")
+
 master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.23.23/MDM 10.23.23.csv")
+```
 
-################ Read Data Fixed files ####################
+### Read Data Fixed files (Click play after inputting correct resources)
+```{r}
 coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2023/10.23.23/ProjectList_10_23_2023 7_42_01 AM.xlsx")
+
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
+
 macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Macro Platform.xlsx")
+```
 
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
+### Input previous week's data (Click play after inputting correct resource)
+```{r}
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.16.23.xlsx") 
+```
 
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.16.23.xlsx") # input Previous week's data
-prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM/PRM.xlsx") # Make sure to update .xlsx file before you run this tool
+### Input previouse week's data (Click play after inputting correct resource) *Make sure to update .xlsx file before you run this tool)*
+```{r}
+prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM/PRM.xlsx")
+```
 
-
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-
+### Input the past date to figure out new projects (Click play after inputting correct *date range*)
+```{r}
 mfg_location_tab_raw %>% 
   janitor::clean_names() %>% 
-  dplyr::filter(project_submitted_date >= as.Date("2023-10-15") & project_submitted_date <= as.Date("2023-10-22")) %>%  #### Input the past date to figure out new projects ####
-dplyr::select(project_number) -> new_projects
+  dplyr::filter(project_submitted_date >= as.Date("2023-10-15") & project_submitted_date <= as.Date("2023-10-22")) %>%
+  dplyr::select(project_number) -> new_projects
+```
 
+### input Previous week's data
+```{r}
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.16.2023.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.16.2023.xlsx")
+```
 
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.16.2023.xlsx") # input Previous week's data
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.16.2023.xlsx") # input Previous week's data
-
+### Click Play (Process Automation)
+```{r}
 ##################### (Velocity Tab) #####################
 comp %>% 
   janitor::clean_names() %>% 
@@ -164,35 +184,32 @@ clean_customer_new_added[!duplicated(clean_customer_new_added[,c("pcs_customer_n
 clean_customer_new_added %>% 
   dplyr::filter(!is.na(pcs_customer_name)) -> clean_customer_new_added
 
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
 
+```
+
+### Now, create the documents that require manual work *make sure to input today's date*
+```{r}
 writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.23.23.xlsx")
 writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.23.2023.xlsx")
 writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.23.2023.xlsx")
 
-##############################################################################################################################################################
-####################################### Now you go back to the .xlsx file & finish your manual work from PCS System ##########################################
-##############################################################################################################################################################
+```
 
+
+
+### Now you go back to the .xlsx file & finish your manual work from PCS System
+
+
+
+### Read the documents that were completed manually
+```{r}
 comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.23.23.xlsx")
 mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.23.2023.xlsx")
 clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.23.2023.xlsx")
+```
 
-######################################################################################################################################################
-
+### Click Play (Process Automation)
+```{r}
 # Clean customer arrange
 clean_customer %>%
   dplyr::arrange(pcs_customer_name) -> clean_customer
@@ -316,6 +333,7 @@ mfg_location_tab_raw %>%
 
 
 cbind(mfg_location_tab, mfg_location_tab_raw_dates) -> mfg_location_tab
+
 
 
 
@@ -593,9 +611,17 @@ list("Data" = mfg_location_tab,
      "Velocity" = velocity,
      "R&D Unique Ingredient Info" = rnd_unique_ingredient_info) -> list_of_dfs
 
+```
 
+### Export the final documents (make sure to input the correct directory and date)
+```{r}
 writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2023/10.23.2023/mfg_location_tab_10.23.2023.xlsx")
+
 writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2023/10.23.2023/pcs_data_10.23.2023.xlsx")
+
+```
+
+
 
 
 
