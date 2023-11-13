@@ -615,9 +615,9 @@ list("Data" = mfg_location_tab,
 
 ### Export the final documents (make sure to input the correct directory and date)
 ```{r}
-writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2023/11.06.2023/mfg_location_tab_11.13.2023.xlsx")
+writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2023/11.13.2023/mfg_location_tab_11.13.2023.xlsx")
 
-writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2023/11.06.2023/pcs_data_11.13.2023.xlsx")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2023/11.13.2023/pcs_data_11.13.2023.xlsx")
 
 ```
 
