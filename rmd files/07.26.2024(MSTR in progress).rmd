@@ -24,20 +24,20 @@ options(scipen=999)
 
 ### Read Original Raw data from the system (Click play after inputting correct resources)
 ```{r}
-mfg_location_tab_raw <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/06.10.2024/All PCS Projects - With MFG Locations - 2024-06-10T090532.846.csv")
+mfg_location_tab_raw <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/07.26.2024/All PCS Projects - With MFG Loc (1).xlsx")
 
-pcs_rnd_primary_pack_graphics <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/06.10.2024/PCS R&D Primary & Pack Graphics (84).csv")
+pcs_rnd_primary_pack_graphics <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/07.26.2024/PCS R&D Primary & Pack Graphics (3).xlsx")
 
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
 
-rnd_unique_ingredient_info <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/06.10.2024/PCS R&D Unique Ingredients (85).csv")
+rnd_unique_ingredient_info <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/07.26.2024/PCS R&D Unique Ingredients (3).xlsx")
 
-master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/06.10.2024/SRCH209546.csv")
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/07.26.2024/SRCH394849.csv")
 ```
 
 ### Read Data Fixed files (Click play after inputting correct resources)
 ```{r}
-coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/06.10.2024/ProjectList_6_10_2024 5_56_42 AM.xlsx")
+coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/07.26.2024/ProjectList_7_26_2024 8_24_28 AM.xlsx")
 
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 
@@ -46,7 +46,7 @@ macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting
 
 ### Input previous week's data (Click play after inputting correct resource)
 ```{r}
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 06.03.2024.xlsx") 
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 07.22.2024.xlsx") 
 ```
 
 ### Input previouse week's data (Click play after inputting correct resource) *Make sure to update .xlsx file before you run this tool)*
@@ -56,16 +56,22 @@ prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 
 ### Input the past date to figure out new projects (Click play after inputting correct *date range*)
 ```{r}
+mfg_location_tab_raw[-1, ] -> mfg_location_tab_raw
+colnames(mfg_location_tab_raw) <- mfg_location_tab_raw[1, ]
+mfg_location_tab_raw[-1, ] -> mfg_location_tab_raw
+
 mfg_location_tab_raw %>% 
   janitor::clean_names() %>% 
-  dplyr::filter(project_submitted_date >= as.Date("2024-06-02") & project_submitted_date <= as.Date("2024-06-09")) %>%
+  dplyr::mutate(project_submitted_date = as.double(project_submitted_date),
+                project_submitted_date = as.Date(project_submitted_date, origin = "1899-12-30")) %>% 
+  dplyr::filter(project_submitted_date >= as.Date("2024-07-21") & project_submitted_date <= as.Date("2024-07-25")) %>%
   dplyr::select(project_number) -> new_projects
 ```
 
 ### input Previous week's data
 ```{r}
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 06.03.2024.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 06.03.2024.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 07.22.2024.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 07.22.2024.xlsx")
 ```
 
 ### Click Play (Process Automation)
@@ -80,7 +86,7 @@ comp_velocity[!duplicated(comp_velocity[,c("pcs_fs_id_number")]),] -> comp_veloc
 
 mfg_location_tab_raw %>% 
   janitor::clean_names() %>% 
-  dplyr::select(1, 2, 15) %>% 
+  dplyr::select(project_number, project_status, task_name) %>% 
   dplyr::rename(pcs_fs_id_number = project_number,
                 pcs_stage_2 = project_status,
                 pcs_task = task_name) -> proj_velocity
@@ -94,15 +100,15 @@ velocity_opp_overview %>%
   dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
                 capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
   dplyr::left_join(comp_velocity) %>% 
-  dplyr::left_join(proj_velocity) %>% 
+  dplyr::left_join(proj_velocity %>% dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number))) %>% 
   dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
   dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
   dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity_1
 
 
 mfg_location_tab_raw %>% 
-  dplyr::select(1, 2) %>% 
   janitor::clean_names() %>% 
+  dplyr::select(project_number, project_status) %>% 
   dplyr::rename(pcs_stage = project_status,
                 pcs_fs_id_number = project_number) -> proj_pcs_status
 
@@ -111,7 +117,7 @@ proj_pcs_status[!duplicated(proj_pcs_status[,c("pcs_fs_id_number")]),] -> proj_p
 velocity_1 %>% 
   dplyr::filter(!is.na(pcs_task)) %>% 
   dplyr::filter(!is.na(pcs_stage)) %>% 
-  dplyr::left_join(proj_pcs_status) -> velocity_2
+  dplyr::left_join(proj_pcs_status %>% dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number ))) -> velocity_2
 
 
 comp_velocity %>% 
@@ -189,9 +195,9 @@ clean_customer_new_added %>%
 
 ### Now, create the documents that require manual work *make sure to input today's date*
 ```{r}
-writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 06.10.2024.xlsx")
-writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 06.10.2024.xlsx")
-writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 06.10.2024.xlsx")
+writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 07.22.2024.xlsx")
+writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 07.22.2024.xlsx")
+writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 07.22.2024.xlsx")
 
 ```
 
@@ -203,9 +209,9 @@ writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Do
 
 ### Read the documents that were completed manually
 ```{r}
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 06.10.2024.xlsx")
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 06.10.2024.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 06.10.2024.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 07.22.2024.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 07.22.2024.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 07.22.2024.xlsx")
 ```
 
 ### Click Play (Process Automation)
@@ -224,7 +230,7 @@ comp_velocity[!duplicated(comp_velocity[,c("pcs_fs_id_number")]),] -> comp_veloc
 
 mfg_location_tab_raw %>% 
   janitor::clean_names() %>% 
-  dplyr::select(1, 2, 15) %>% 
+  dplyr::select(project_number, project_status, task_name) %>% 
   dplyr::rename(pcs_fs_id_number = project_number,
                 pcs_stage_2 = project_status,
                 pcs_task = task_name) -> proj_velocity
@@ -238,14 +244,14 @@ velocity_opp_overview %>%
   dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number),
                 capacity_confirm_date = as.Date(capacity_confirm_date)) %>% 
   dplyr::left_join(comp_velocity) %>% 
-  dplyr::left_join(proj_velocity) %>% 
+  dplyr::left_join(proj_velocity %>% dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number))) %>% 
   dplyr::mutate(pcs_stage = ifelse(is.na(pcs_stage_1), pcs_stage_2, pcs_stage_1)) %>% 
   dplyr::select(-pcs_stage_1, -pcs_stage_2) %>% 
   dplyr::relocate(pcs_fs_id_number, forecast_submission_id, pcs_stage, pcs_task, operations_confirmed_capacity, capacity_confirm_date) -> velocity_1
 
 mfg_location_tab_raw %>% 
-  dplyr::select(1, 2) %>% 
   janitor::clean_names() %>% 
+  dplyr::select(project_status, project_number) %>% 
   dplyr::rename(pcs_stage = project_status,
                 pcs_fs_id_number = project_number) -> proj_pcs_status
 
@@ -254,7 +260,7 @@ proj_pcs_status[!duplicated(proj_pcs_status[,c("pcs_fs_id_number")]),] -> proj_p
 velocity_1 %>% 
   dplyr::filter(!is.na(pcs_task)) %>% 
   dplyr::filter(!is.na(pcs_stage)) %>% 
-  dplyr::left_join(proj_pcs_status) -> velocity_2
+  dplyr::left_join(proj_pcs_status %>% dplyr::mutate(pcs_fs_id_number = as.double(pcs_fs_id_number))) -> velocity_2
 
 velocity_1 %>% 
   dplyr::filter(is.na(pcs_task)) -> velocity_4
@@ -315,7 +321,7 @@ mpi %>%
 mpi_data[!duplicated(mpi_data[,c("project_number")]),] -> mpi_data
 
 mfg_location_tab %>% 
-  dplyr::left_join(mpi_data) -> mfg_location_tab
+  dplyr::left_join(mpi_data %>% mutate(project_number = as.character(project_number))) -> mfg_location_tab
 
 
 
@@ -341,9 +347,11 @@ cbind(mfg_location_tab, mfg_location_tab_raw_dates) -> mfg_location_tab
 
 
 # Column: Desired Month
+
 mfg_location_tab %>% 
-  dplyr::mutate(desired_month = lubridate::month(desired_launch_date),
-                desired_month = lubridate::month(desired_month, label = TRUE)) -> mfg_location_tab
+  dplyr::mutate(desired_launch_date = as.double(desired_launch_date)) %>% 
+  dplyr::mutate(desired_launch_date = as.Date(desired_launch_date, origin = "1899-12-30")) %>% 
+  dplyr::mutate(desired_month = lubridate::month(desired_launch_date, label = TRUE)) -> mfg_location_tab
 
 # Column: Desired Year
 mfg_location_tab %>% 
@@ -375,7 +383,7 @@ coordinator_data[!duplicated(coordinator_data[,c("project_number")]),] -> coordi
 
 
 mfg_location_tab %>% 
-  dplyr::left_join(coordinator_data) -> mfg_location_tab
+  dplyr::left_join(coordinator_data %>% mutate(project_number = as.character(project_number))) -> mfg_location_tab
 
 
 # Column: Processing Type
@@ -389,6 +397,8 @@ mfg_location_tab %>%
 
 # Column: # days since project was created
 mfg_location_tab %>% 
+  dplyr::mutate(project_submitted_date = as.double(project_submitted_date)) %>% 
+  dplyr::mutate(project_submitted_date = as.Date(project_submitted_date, origin = "1899-12-30")) %>% 
   dplyr::mutate(days_since_project_was_created = Sys.Date() - project_submitted_date,
                 days_since_project_was_created = as.integer(days_since_project_was_created)) -> mfg_location_tab
 
@@ -399,6 +409,12 @@ mfg_location_tab %>%
 
 
 # Column: R&D Primary
+pcs_rnd_primary_pack_graphics[-1, ] -> pcs_rnd_primary_pack_graphics
+colnames(pcs_rnd_primary_pack_graphics) <- pcs_rnd_primary_pack_graphics[1, ]
+pcs_rnd_primary_pack_graphics[-1, ] -> pcs_rnd_primary_pack_graphics
+
+
+
 pcs_rnd_primary_pack_graphics %>% 
   janitor::clean_names() %>% 
   data.frame() %>% 
@@ -419,7 +435,7 @@ velocity %>%
                 velocity_opp = forecast_submission_id) -> velocity_data
 
 mfg_location_tab %>% 
-  dplyr::left_join(velocity_data) %>% 
+  dplyr::left_join(velocity_data %>% mutate(project_number = as.character(project_number))) %>% 
   dplyr::mutate(velocity_opp = ifelse(is.na(velocity_opp), "-", velocity_opp)) -> mfg_location_tab
 
 
@@ -453,7 +469,7 @@ prm %>%
 prm_date_data[!duplicated(prm_date_data[,c("project_number")]),] -> prm_date_data
 
 mfg_location_tab %>% 
-  dplyr::left_join(prm_date_data) -> mfg_location_tab
+  dplyr::left_join(prm_date_data %>% mutate(project_number = as.character(project_number))) -> mfg_location_tab
 
 # Column: PRM Topic
 prm %>% 
@@ -467,7 +483,7 @@ prm %>%
 prm_topic_data[!duplicated(prm_topic_data[,c("project_number")]),] -> prm_topic_data
 
 mfg_location_tab %>% 
-  dplyr::left_join(prm_topic_data) %>% 
+  dplyr::left_join(prm_topic_data %>% mutate(project_number = as.character(project_number))) %>% 
   dplyr::mutate(prm_topic = ifelse(is.na(prm_topic), "-", prm_topic)) -> mfg_location_tab
 
 # Column: PRM Expedite Status
@@ -481,7 +497,7 @@ prm %>%
 prm_expedited_status_data[!duplicated(prm_expedited_status_data[,c("project_number")]),] -> prm_expedited_status_data
 
 mfg_location_tab %>% 
-  dplyr::left_join(prm_expedited_status_data) %>% 
+  dplyr::left_join(prm_expedited_status_data %>% mutate(project_number = as.character(project_number))) %>% 
   dplyr::mutate(pcs_expedited_status = ifelse(is.na(pcs_expedited_status), "-", pcs_expedited_status)) -> mfg_location_tab
 
 # Column: Reason for Expedite
@@ -495,7 +511,7 @@ prm %>%
 prm_reason_for_expedite_data[!duplicated(prm_reason_for_expedite_data[,c("project_number")]),] -> prm_reason_for_expedite_data
 
 mfg_location_tab %>% 
-  dplyr::left_join(prm_reason_for_expedite_data) %>% 
+  dplyr::left_join(prm_reason_for_expedite_data %>% mutate(project_number = as.character(project_number))) %>% 
   dplyr::mutate(reason_for_expedite = ifelse(is.na(reason_for_expedite), "-", reason_for_expedite)) -> mfg_location_tab
 
 
@@ -537,7 +553,7 @@ master_data %>%
 
 
 mfg_location_tab %>% 
-  dplyr::left_join(master_data_oil_percent) %>% 
+  dplyr::left_join(master_data_oil_percent %>% mutate(new_sku_base = as.character(new_sku_base))) %>% 
   dplyr::mutate(mdm_total_oil_percent = ifelse(is.na(mdm_total_oil_percent), 0, mdm_total_oil_percent)) -> mfg_location_tab
 
 
@@ -550,9 +566,20 @@ mfg_location_tab %>%
 
 
 # Date format work
-mfg_location_tab %>% 
-  dplyr::mutate(dplyr::across(contains("date"), ~ as.Date(.x, format="%Y-%m-%d"))) %>%
-  dplyr::mutate(dplyr::across(contains("date"), ~ format(.x, "%m/%d/%Y"))) -> mfg_location_tab
+date_columns <- names(mfg_location_tab) %>%
+  .[grepl("date", .)] %>%
+  .[! . %in% c("desired_launch_date", "prm_date")]
+
+# Perform the conversion
+mfg_location_tab %>%
+  dplyr::mutate(across(
+    all_of(date_columns),
+    ~ as.double(.)
+  )) %>%
+  dplyr::mutate(across(
+    all_of(date_columns),
+    ~ as.Date(. , origin = "1899-12-30")
+  )) -> mfg_location_tab
 
 # Data Clean Work
 mfg_location_tab %>% 
@@ -560,7 +587,6 @@ mfg_location_tab %>%
                 total_actual_duration_days = round(total_actual_duration_days, 0)) -> mfg_location_tab
 
 # Duplication removal
-mfg_location_tab
 mfg_location_tab[!duplicated(mfg_location_tab[,c("project_number", "pcs_manufacturing_location")]),] -> mfg_location_tab
 
 
@@ -579,6 +605,10 @@ velocity %>%
 
 
 ##################### (R&D Unique Ingredients) #####################
+rnd_unique_ingredient_info[-1, ] -> rnd_unique_ingredient_info
+colnames(rnd_unique_ingredient_info) <- rnd_unique_ingredient_info[1, ]
+rnd_unique_ingredient_info[-1, ] -> rnd_unique_ingredient_info
+
 rnd_unique_ingredient_info %>% 
   janitor::clean_names() %>% 
   data.frame() -> rnd_unique_ingredient_info
@@ -615,9 +645,9 @@ list("Data" = mfg_location_tab,
 
 ### Export the final documents (make sure to input the correct directory and date)
 ```{r}
-writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/06.10.2024/mfg_location_tab_06.10.2024.xlsx")
+writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/07.26.2024/mfg_location_tab_07.26.2024.xlsx")
 
-writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/06.10.2024/pcs_data_06.10.2024.xlsx")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/07.26.2024/pcs_data_07.26.2024.xlsx")
 
 ```
 
