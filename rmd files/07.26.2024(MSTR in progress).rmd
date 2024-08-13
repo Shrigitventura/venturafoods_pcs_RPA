@@ -590,6 +590,18 @@ mfg_location_tab %>%
 mfg_location_tab[!duplicated(mfg_location_tab[,c("project_number", "pcs_manufacturing_location")]),] -> mfg_location_tab
 
 
+mfg_location_tab_raw %>% 
+  janitor::clean_names() %>% 
+  dplyr::distinct(project_number, .keep_all = TRUE) %>% 
+  dplyr::select(project_number, project_submitted_date) %>% 
+  dplyr::mutate(project_submitted_date = as.double(project_submitted_date)) %>% 
+  dplyr::mutate(project_submitted_date = as.Date(project_submitted_date, origin = "1899-12-30")) -> project_submitted_date
+
+mfg_location_tab %>% 
+  dplyr::select(-project_submitted_date) %>% 
+  dplyr::left_join(project_submitted_date, by = "project_number") %>% 
+  dplyr::relocate(project_submitted_date, .after = mpi) -> mfg_location_tab
+
 
 
 ################################################################################################################################################################
