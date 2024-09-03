@@ -24,20 +24,20 @@ options(scipen=999)
 
 ### Read Original Raw data from the system (Click play after inputting correct resources)
 ```{r}
-mfg_location_tab_raw <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/08.26.2024/All PCS Projects - With MFG Loc (1).xlsx")
+mfg_location_tab_raw <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.03.2024/All PCS Projects - With MFG Loc (2).xlsx")
 
-pcs_rnd_primary_pack_graphics <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/08.26.2024/PCS R&D Primary & Pack Graphics (1).xlsx")
+pcs_rnd_primary_pack_graphics <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.03.2024/PCS R&D Primary & Pack Graphics (2).xlsx")
 
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
 
-rnd_unique_ingredient_info <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/08.26.2024/PCS R&D Unique Ingredients (1).xlsx")
+rnd_unique_ingredient_info <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.03.2024/PCS R&D Unique Ingredients (2).xlsx")
 
-master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/08.26.2024/SRCH514266.csv")
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.03.2024/SRCH541352.csv")
 ```
 
 ### Read Data Fixed files (Click play after inputting correct resources)
 ```{r}
-coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/08.26.2024/ProjectList_8_26_2024 10_49_19 AM.xlsx")
+coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.03.2024/ProjectList_9_3_2024 10_44_17 AM.xlsx")
 
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 
@@ -46,10 +46,10 @@ macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting
 
 ### Input previous week's data (Click play after inputting correct resource)
 ```{r}
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 08.19.2024.xlsx") 
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 08.26.2024.xlsx") 
 ```
 
-### Input previouse week's data (Click play after inputting correct resource) *Make sure to update .xlsx file before you run this tool)*
+### Input previous week's data (Click play after inputting correct resource) *Make sure to update .xlsx file before you run this tool)*
 ```{r}
 prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM/PRM.xlsx")
 ```
@@ -59,6 +59,11 @@ prm <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/R
 mfg_location_tab_raw[-1, ] -> mfg_location_tab_raw
 colnames(mfg_location_tab_raw) <- mfg_location_tab_raw[1, ]
 mfg_location_tab_raw[-1, ] -> mfg_location_tab_raw
+
+```
+
+
+```{r}
 
 mfg_location_tab_raw %>% 
   janitor::clean_names() %>% 
