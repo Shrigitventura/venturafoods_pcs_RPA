@@ -6,8 +6,8 @@ editor_options:
 ---
   
   
-  ### Load the Libraries (click Play)
-  ```{r}
+### Load the Libraries (click Play)
+```{r}
 library(tidyverse)
 library(magrittr)
 library(openxlsx)
@@ -64,7 +64,7 @@ mfg_location_tab_raw %>%
   janitor::clean_names() %>% 
   dplyr::mutate(project_submitted_date = as.double(project_submitted_date),
                 project_submitted_date = as.Date(project_submitted_date, origin = "1899-12-30")) %>% 
-  dplyr::filter(project_submitted_date >= as.Date("2024-08-18") & project_submitted_date <= as.Date("2024-08-24")) %>%
+  dplyr::filter(project_submitted_date >= as.Date("2024-08-25") & project_submitted_date <= as.Date("2024-09-01")) %>%
   dplyr::select(project_number) -> new_projects
 ```
 
