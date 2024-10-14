@@ -7,7 +7,7 @@ editor_options:
   
   
   ### Load the Libraries (click Play)
-```{r}
+  ```{r}
 library(tidyverse)
 library(magrittr)
 library(openxlsx)
@@ -24,20 +24,20 @@ options(scipen=999)
 
 ### Read Original Raw data from the system (Click play after inputting correct resources)
 ```{r}
-mfg_location_tab_raw <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.30.2024/All PCS Projects - With MFG Loc (6).xlsx")
+mfg_location_tab_raw <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/10.07.2024/All PCS Projects - With MFG Loc (7).xlsx")
 
-pcs_rnd_primary_pack_graphics <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.30.2024/PCS R&D Primary & Pack Graphics (6).xlsx")
+pcs_rnd_primary_pack_graphics <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/10.07.2024/PCS R&D Primary & Pack Graphics (7).xlsx")
 
 velocity_opp_overview <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/Velocity Reports/Opportunity Overview Reports/2023/7 - July/7.17.2023/Velocity Opp Overview.xlsx")
 
-rnd_unique_ingredient_info <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.30.2024/PCS R&D Unique Ingredients (6).xlsx")
+rnd_unique_ingredient_info <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/10.07.2024/PCS R&D Unique Ingredients (7).xlsx")
 
-master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.30.2024/SRCH639146.csv")
+master_data <- read_csv("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/10.07.2024/SRCH664282.csv")
 ```
 
 ### Read Data Fixed files (Click play after inputting correct resources)
 ```{r}
-coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/09.30.2024/ProjectList_9_30_2024 3_20_01 PM.xlsx")
+coordinator <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/PCS Weekly Raw Data/2024/10.07.2024/ProjectList_10_7_2024 1_41_05 PM.xlsx")
 
 process_type <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Process Type.xlsx")
 
@@ -46,7 +46,7 @@ macro <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting
 
 ### Input previous week's data (Click play after inputting correct resource)
 ```{r}
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 09.16.2024.xlsx") 
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 09.30.2024.xlsx") 
 ```
 
 ### Input previous week's data (Click play after inputting correct resource) *Make sure to update .xlsx file before you run this tool)*
@@ -75,8 +75,8 @@ mfg_location_tab_raw %>%
 
 ### input Previous week's data
 ```{r}
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 09.16.2024.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 09.16.2024.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 09.30.2024.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 09.30.2024.xlsx")
 ```
 
 ### Click Play (Process Automation)
@@ -200,9 +200,9 @@ clean_customer_new_added %>%
 
 ### Now, create the documents that require manual work *make sure to input today's date*
 ```{r}
-writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 09.30.2024.xlsx")
-writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 09.30.2024.xlsx")
-writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 09.30.2024.xlsx")
+writexl::write_xlsx(comp_update_2, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.07.2024.xlsx")
+writexl::write_xlsx(new_projects_mpi_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.07.2024.xlsx")
+writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.07.2024.xlsx")
 
 ```
 
@@ -210,9 +210,9 @@ writexl::write_xlsx(clean_customer_new_added, "S:/Global Shared Folders/Large Do
 
 ### Read the documents that were completed manually
 ```{r}
-comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 09.30.2024.xlsx")
-mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 09.30.2024.xlsx")
-clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 09.30.2024.xlsx")
+comp <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PRM Status Update/PRM Status 10.07.2024.xlsx")
+mpi <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/MPI/MPI 10.07.2024.xlsx")
+clean_customer <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/Customer Clean/Customer Clean 10.07.2024.xlsx")
 ```
 
 ### Click Play (Process Automation)
@@ -658,9 +658,9 @@ list("Data" = mfg_location_tab,
 
 ### Export the final documents (make sure to input the correct directory and date)
 ```{r}
-writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/09.30.2024/mfg_location_tab_09.30.2024.xlsx")
+writexl::write_xlsx(mfg_location_tab, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/10.07.2024/mfg_location_tab_10.07.2024.xlsx")
 
-writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/09.30.2024/pcs_data_09.30.2024.xlsx")
+writexl::write_xlsx(list_of_dfs, "S:/Global Shared Folders/Large Documents/S&OP/PCS/Reporting/RStudio/PCS Weekly files from RStudio/2024/10.07.2024/pcs_data_10.07.2024.xlsx")
 
 ```
 
